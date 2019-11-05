@@ -4,15 +4,18 @@ node_js:
   - '10.16.0'
 cache:
   directories:
-  - node_modules
+  - "$HOME/.npm"
 install:
-- npm install -q --no-color --no-progress
+  - npm ci
 before_script:
-- curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-- chmod +x ./cc-test-reporter
-- ./cc-test-reporter before-build
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
 script:
-- npm run test:coveralls
-- npm run test:coverage
+  - nvm install
+  - npm run test:coveralls
+  - npm run test:coverage
 after_script:
-- ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+  - ./cc-test-reporter after-build
+notification:
+  - email: false

@@ -50,6 +50,7 @@
     "@babel/runtime": "^7.6.3",
     "babel-loader": "^8.0.6",
     "chai": "^4.2.0",
+    "codeclimate-test-reporter": "^0.5.1",
     "coveralls": "^3.0.7",
     "eslint": "^6.6.0",
     "eslint-config-airbnb-base": "^14.0.0",
