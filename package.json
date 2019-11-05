@@ -8,7 +8,7 @@
     "test": "mocha ./api/test/",
     "test:coverage": "nyc mocha ./api/test/ && nyc report --reporter=text-lcov --coverage",
     "test:coveralls": "nyc mocha ./api/test/ && nyc report --reporter=text-lcov --coverage | coveralls",
-    "start": "node server.js",
+    "start": "node ./api/server.js",
     "dev-server": "nodemon --exec babel-node ./api/server.js"
   },
   "repository": {
@@ -29,13 +29,16 @@
   "dependencies": {
     "bcrypt": "^3.0.6",
     "body-parser": "^1.19.0",
+    "cloudinary": "^1.16.0",
+    "connect-multiparty": "^2.2.0",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-validator": "^6.2.0",
     "helmet": "^3.21.2",
     "hpp": "^0.2.2",
-    "jsonwebtoken": "^8.5.1"
+    "jsonwebtoken": "^8.5.1",
+    "pg": "^7.12.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.6.4",
