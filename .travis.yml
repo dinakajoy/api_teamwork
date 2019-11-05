@@ -5,29 +5,21 @@ node_js:
 cache:
   directories:
   - "$HOME/.npm"
-addons:
-  chrome: stable
 env:
   global:
-    CC_TEST_REPORTER_ID=process.env.CODECLIMATE_REPO_TOKEN
+    secure: "DqPPUAD4KqS0Dco45HUaxhvPEVWIPb+eHWI28+II9IjVotEv9t2tmxpYp/wgSYMH1ggccHEtZNJNexwxtPx+WqymCzxvrL38DoLL4K8TbQ0m04GiyDb0YM8F+y/JLcSg2LOSEQR1Br3KOa4gjDW1S7oiUWZGJp1xQqZX09RTaNM5t+4v7YzPf7DUBiXqltDH4p1FgYExZqdMPLM6Oml6/bPn9iHAsnO3mnHnSICsGiUbJ0v588pON4efZGrSwVfzTxu0b6z7BH4mTZYigLX2iFsz3xBWHNKB2IoFRceHr51zbpGzi8bzTPbiC+y35e/WDX2E9y596NhjHQS2Kj6yjCzpGKwh4uJIJ9wUBWFpjiynoz64xv4/knzgS7C4E7XJo8KXFAU0TZXs24eCxZheIbPKoYJB2/qaYR37/4BlK9wBjOYAeQcO+dAa4sr8mil0upkukmmXf03ej2D5AIojKsLHv8QKc0WYDljxxa2MdfVpqYxkEt/7+7yTx9UwSHTPn9t/Y/FeokFYy5c8UYam2dUX22TUhGn4PHDeF2l+h3WBAjGeIOJw6bf7N+T+J1BqnxQUajwKmJ8AS4prJ6S4dv03yHFJguq2n72wPuNYS5K2stRbkNrfY7tnNcCdigCdd1ASEwyuzPGk0yjIbofI6zYZgPSCtzqmrmXIo9gk8sU="
 before_install:
   - nvm install                         # Install node version from .nvmrc
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
 install:
   - npm ci
-  - npm install --without production --path=${BUNDLE_PATH:-vendor/bundle}
-# Setup the database
-
+before_script:
+  - ./cc-test-reporter before-build
 script:
-  - npm run lint
-  - npm run test:coverage # Frontend linting & specs
-  - npm run test:coveralls # Frontend linting & specs
-# Pipe the coverage data to Code Climate
+  - npm run test:coveralls
+  - npm run test:coverage
 after_script:
-  - ./cc-test-reporter format-coverage -t simplecov -o coverage/codeclimate.backend.json coverage/backend/.resultset.json # Format backend coverage
-  - ./cc-test-reporter format-coverage -t lcov -o coverage/codeclimate.frontend.json coverage/frontend/lcov.info  # Format frontend coverage
-  - ./cc-test-reporter sum-coverage coverage/codeclimate.*.json -p 2                  # Sum both coverage parts into coverage/codeclimate.json
-  - if [[ "$TRAVIS_TEST_RESULT" == 0 ]]; then ./cc-test-reporter upload-coverage; fi  # Upload coverage/codeclimate.json
+  - ./cc-test-reporter after-build -t lcov --exit-code $TRAVIS_TEST_RESULT
 notification:
   - email: false
