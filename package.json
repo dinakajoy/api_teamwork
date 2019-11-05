@@ -6,8 +6,8 @@
   "scripts": {
     "pretest": "eslint .",
     "test": "mocha ./api/test/",
-    "test:coverage": "nyc mocha && nyc report --reporter=text-lcov --coverage",
-    "test:coveralls": "nyc mocha && nyc report --reporter=text-lcov --coverage | coveralls",
+    "test:coverage": "nyc mocha ./api/test/ && nyc report --reporter=text-lcov --coverage",
+    "test:coveralls": "nyc mocha ./api/test/ && nyc report --reporter=text-lcov --coverage | coveralls",
     "start": "node server.js",
     "dev-server": "nodemon --exec babel-node ./api/server.js"
   },
