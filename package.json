@@ -6,9 +6,9 @@
   "scripts": {
     "pretest": "eslint .",
     "test": "mocha ./api/test/",
-    "test:coverage": "nyc npm run test && nyc report --reporter=text-lcov  --coverage < lcov.info",
+    "test:coverage": "nyc npm run test && nyc report --reporter=lcov",
     "test:coveralls": "nyc npm run test && nyc report --reporter=text-lcov --coverage | coveralls",
-    "coverage": "nyc npm run test && npm run test:coveralls && npm run test:coverage",
+    "coverage": "npm run test:coveralls && npm run test:coverage",
     "start": "node ./api/server.js",
     "dev-server": "nodemon --exec babel-node ./api/server.js"
   },
