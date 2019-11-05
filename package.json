@@ -6,10 +6,9 @@
   "scripts": {
     "pretest": "eslint .",
     "test": "mocha ./api/test/",
-    "generate-lcov": "nyc report --reporter=text-lcov -- coverage > lcov.info",
-    "coveralls-coverage": "coveralls < lcov.info",
-    "codeclimate-coverage": "cc-test-reporter < lcov.info",
-    "coverage": "nyc npm run test && npm run generate-lcov && npm run coveralls-coverage && npm run codeclimate-coverage",
+    "test:coverage": "nyc npm run test && nyc report --reporter=text-lcov  --coverage < lcov.info",
+    "test:coveralls": "nyc npm run test && nyc report --reporter=text-lcov --coverage | coveralls",
+    "coverage": "nyc npm run test && npm run test:coveralls && test:coverage",
     "start": "node ./api/server.js",
     "dev-server": "nodemon --exec babel-node ./api/server.js"
   },
