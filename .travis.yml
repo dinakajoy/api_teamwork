@@ -15,6 +15,6 @@ install:
 script:
   - npm run coverage
 after_script:
-  - ./cc-test-reporter after-build -t lcov.info --debug --exit-code $TRAVIS_TEST_RESULT
+  - ./cc-test-reporter after-build -t format-coverage lcov.info --debug --exit-code $TRAVIS_TEST_RESULT
 notification:
   - email: false
