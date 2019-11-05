@@ -6,7 +6,7 @@
   "scripts": {
     "pretest": "eslint .",
     "test": "mocha ./api/test/",
-    "generate-lcov": "nyc report --reporter=text-lcov > lcov.info",
+    "generate-lcov": "nyc report --reporter=text-lcov -- coverage > lcov.info",
     "coveralls-coverage": "coveralls < lcov.info",
     "codeclimate-coverage": "cc-test-reporter < lcov.info",
     "coverage": "nyc npm run test && npm run generate-lcov && npm run coveralls-coverage && npm run codeclimate-coverage",
