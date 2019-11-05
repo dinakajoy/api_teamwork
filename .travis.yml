@@ -6,16 +6,17 @@ cache:
   directories:
   - "$HOME/.npm"
 before_install:
-  - nvm install                         # Install node version from .nvmrc
+  - nvm install
+install:
+  - npm ci
+before_script:                         # Install node version from .nvmrc
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
-install:
-  - npm ci
 script:
   - npm run coverage
 after_script:
-  # - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
-  - ./cc-test-reporter after-build format-coverage -t lcov lcov.info --debug --exit-code $TRAVIS_TEST_RESULT
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+  # - ./cc-test-reporter after-build format-coverage -t lcov lcov.info --debug --exit-code $TRAVIS_TEST_RESULT
 notification:
   - email: false
