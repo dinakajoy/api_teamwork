@@ -1,0 +1,33 @@
+# multiple tests suites
+language: node_js
+node_js:
+  - '10.16.0'
+cache:
+  directories:
+  - "$HOME/.npm"
+addons:
+  chrome: stable
+env:
+  global:
+    CC_TEST_REPORTER_ID=process.env.CODECLIMATE_REPO_TOKEN
+before_install:
+  - nvm install                         # Install node version from .nvmrc
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+install:
+  - npm ci
+  - npm install --without production --path=${BUNDLE_PATH:-vendor/bundle}
+# Setup the database
+
+script:
+  - npm run lint
+  - npm run test:coverage # Frontend linting & specs
+  - npm run test:coveralls # Frontend linting & specs
+# Pipe the coverage data to Code Climate
+after_script:
+  - ./cc-test-reporter format-coverage -t simplecov -o coverage/codeclimate.backend.json coverage/backend/.resultset.json # Format backend coverage
+  - ./cc-test-reporter format-coverage -t lcov -o coverage/codeclimate.frontend.json coverage/frontend/lcov.info  # Format frontend coverage
+  - ./cc-test-reporter sum-coverage coverage/codeclimate.*.json -p 2                  # Sum both coverage parts into coverage/codeclimate.json
+  - if [[ "$TRAVIS_TEST_RESULT" == 0 ]]; then ./cc-test-reporter upload-coverage; fi  # Upload coverage/codeclimate.json
+notification:
+  - email: false
