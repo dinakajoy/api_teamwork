@@ -18,7 +18,7 @@ script:
 after_script:
   - ./cc-test-reporter after-build
 after_success:
-  - npm install codeclimate-test-reporter
+  - npm install cc-test-reporter
   - cc-test-reporter < coverage/lcov.info
 notification:
   - email: false
