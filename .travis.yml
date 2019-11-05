@@ -5,32 +5,18 @@ node_js:
 cache:
   directories:
   - "$HOME/.npm"
-install:
-  - npm ci
 before_install:
   - nvm install                         # Install node version from .nvmrc
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
-  #- export DISPLAY=:99.0                # Display number for xvfb (for headless browser testing)
-  #- sh -e /etc/init.d/xvfb start        # Start xvfb (for headless browser testing)
-
+  - ./cc-test-reporter before-build
 install:
-  - bundle install --without production --path=${BUNDLE_PATH:-lcov.info}  # Install ruby gems, excluding production only gems such as unicorn (already present by default in Travis)
-  - npm install                         # Install npm dependencies
-  #- npm install karma-firefox-launcher codeclimate-test-reporter
-
-# Setup the database
-before_script: bundle exec rake db:create db:migrate
-
-# Run the test suites
+  - npm ci
 script:
-  - bundle exec rubocop -DESP           # Backend linting
-  - bundle exec rake                    # Backend specs
-  - npm run coverage                            # Frontend linting & specs
-
-# Pipe the coverage data to Code Climate
+  - npm run test
 after_script:
-  - ./cc-test-reporter format-coverage -t simplecov -o coverage/codeclimate.backend.json coverage/backend/.resultset.json # Format backend coverage
-  - ./cc-test-reporter format-coverage -t lcov -o coverage/codeclimate.frontend.json coverage/frontend/lcov.info  # Format frontend coverage
-  - ./cc-test-reporter sum-coverage coverage/codeclimate.*.json -p 2                  # Sum both coverage parts into coverage/codeclimate.json
-  - if [[ "$TRAVIS_TEST_RESULT" == 0 ]]; then ./cc-test-reporter upload-coverage; fi  # Upload coverage/codeclimate.json
+  - ./cc-test-reporter after-build --debug -t lcov --exit-code $TRAVIS_TEST_RESULT
+after_success:
+  - npm run coverage
+notification:
+  - email: false
