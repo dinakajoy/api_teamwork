@@ -1,4 +1,3 @@
-# multiple tests suites
 language: node_js
 node_js:
   - '10.16.0'
@@ -9,7 +8,14 @@ before_install:
   - nvm install
 install:
   - npm ci
+services:
+  - postgresql
+env:
+  global:
+  - NODE_ENV=test
 before_script:                         # Install node version from .nvmrc
+  - psql -c 'create database book_test;' -U postgres
+  - psql -c "CREATE USER odinaka_joy WITH PASSWORD Odionye@909;" -U postgres
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
