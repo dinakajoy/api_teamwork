@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const { check, validationResult } = require('express-validator');
 
 const UserService = require('../services/UserService');
@@ -23,7 +24,7 @@ exports.signup = async (req, res) => {
     util.setError({ errors: errors.msg });
     return util.send(res);
   }
-  const hash = bcrypt.hash(req.body.password, 10);
+  const hash = bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(8));
   const newUser = {
     isAdmin: req.body.name,
     firstName: req.body.firstName,
@@ -46,4 +47,59 @@ exports.signup = async (req, res) => {
     util.setError(400, error.message);
     return util.send(res);
   }
+};
+
+exports.signin = async (req, res) => {
+  const validationData = [
+    check(req.body.email).isEmail(),
+    check(req.body.password).isLength({ min: 6 })
+  ];
+  const errors = validationResult(validationData);
+  if (!errors.isEmpty()) {
+    util.setError({ errors: errors.msg });
+    return util.send(res);
+  }
+  const userDetails = {
+    email: req.body.email,
+    password: req.body.password
+  };
+  try {
+    await UserService.getUser(userDetails.email)
+      .then((user) => {
+        if (!user || user.rows < 1) {
+          util.setError(401, 'Sorry, Your Email Does Not Exist!');
+          return util.send(res);
+        }
+        const passwrd = user.rows[0].password;
+        return bcrypt.compare(userDetails.password, passwrd).then((result) => {
+          console.log(result);
+          if (!result) {
+            util.setError(401, 'Incorrect password!');
+            return util.send(res);
+          }
+          const token = jwt.sign(
+            { userId: user.userId },
+            'My_Secret_Token',
+            { expiresIn: '24h' }
+          );
+          util.setSuccess(200, {
+            userId: user.rows[0].userId,
+            token,
+            firstName: user.rows[0].firstName,
+            lastName: user.rows[0].lastName
+          });
+          return util.send(res);
+        }).catch((error) => {
+          util.setError(500, error.message);
+          return util.send(res);
+        });
+      }).catch((error) => {
+        util.setError(400, error.message);
+        return util.send(res);
+      });
+  } catch (error) {
+    util.setError(500, error.message);
+    return util.send(res);
+  }
+  return res.end;
 };
