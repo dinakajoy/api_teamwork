@@ -2,7 +2,6 @@ require('dotenv').config();
 
 const { Pool } = require('pg');
 
-// const env = process.env.NODE_ENV ? process.env.NODE_ENV : 'development';
 console.log('This is the environment: ', process.env.NODE_ENV);
 
 let pool;
@@ -32,17 +31,4 @@ if (!pool) {
     console.log('connected to the Database Successfully');
   });
 }
-
-function dbQuery(sql) {
-  pool.query(sql)
-    .then((res) => {
-      return res;
-    })
-    .catch((err) => {
-      return err;
-    });
-  pool.end();
-}
-
-module.exports.dbQuery = dbQuery;
 module.exports = pool;
