@@ -2,11 +2,11 @@ require('dotenv').config();
 
 const { Pool } = require('pg');
 
-console.log('This is the environment: ', process.env.NODE_ENV);
+console.log(`This is a ${process.env.NODE_ENV} environment`);
 
 let pool;
-const connectString = `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_DATABASE}`;
-const testConnectString = `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/test_teamwork`;
+const connectionString = `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_DATABASE}`;
+const testConnectionString = `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/test_teamwork`;
 
 if (process.env.NODE_ENV === 'production') {
   pool = new Pool({
@@ -15,11 +15,11 @@ if (process.env.NODE_ENV === 'production') {
   });
 } else if (process.env.NODE_ENV === 'test') {
   pool = new Pool({
-    connectionString: testConnectString
+    connectionString: testConnectionString
   });
 } else {
   pool = new Pool({
-    connectionString: connectString
+    connectionString
   });
 }
 

@@ -1,9 +1,11 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { check, validationResult } = require('express-validator');
+require('dotenv').config();
 
 const UserService = require('../services/UserService');
 const Util = require('../utils/Utils');
+const authDetails = require('../middleware/authMiddleware');
 
 const util = new Util();
 
@@ -21,7 +23,7 @@ exports.signup = async (req, res) => {
   ];
   const errors = validationResult(validationData);
   if (!errors.isEmpty()) {
-    util.setError({ errors: errors.msg });
+    util.setError(400, errors.msg);
     return util.send(res);
   }
   const hash = bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(8));
@@ -40,6 +42,7 @@ exports.signup = async (req, res) => {
     const result = await UserService.addUser(newUser);
     util.setSuccess(201, {
       message: 'User account successfully created',
+      token: req.headers.authorization,
       userId: result.rows[0].userId
     });
     return util.send(res);
@@ -56,7 +59,7 @@ exports.signin = async (req, res) => {
   ];
   const errors = validationResult(validationData);
   if (!errors.isEmpty()) {
-    util.setError({ errors: errors.msg });
+    util.setError(400, errors.msg);
     return util.send(res);
   }
   const userDetails = {
@@ -72,14 +75,13 @@ exports.signin = async (req, res) => {
         }
         const passwrd = user.rows[0].password;
         return bcrypt.compare(userDetails.password, passwrd).then((result) => {
-          console.log(result);
           if (!result) {
             util.setError(401, 'Incorrect password!');
             return util.send(res);
           }
           const token = jwt.sign(
-            { userId: user.userId },
-            'My_Secret_Token',
+            { userId: user.rows[0].userId },
+            process.env.SECRET_TOKEN,
             { expiresIn: '24h' }
           );
           util.setSuccess(200, {

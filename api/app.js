@@ -38,9 +38,8 @@ app.all('*', (req, res, next) => {
 
 app.use('/api/v1/auth', userRoutes);
 
-// app.get('/', multipartMiddleware, (req, res) => {
 app.get('/', (req, res) => {
-  res.json({ message: 'YAY! Congratulations! Your Are Connected To Teamwork Api. You Must Be Authorized To Continue!!!' });
+  res.json({ message: 'YAY! Congratulations! Your Are Connected To Teamwork Api. But, You Must Be Authorized To Continue!!!' });
 });
 
 app.use('/api', (req, res, next) => {
