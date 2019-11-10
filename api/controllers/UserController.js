@@ -5,7 +5,6 @@ require('dotenv').config();
 
 const UserService = require('../services/UserService');
 const Util = require('../utils/Utils');
-const authDetails = require('../middleware/authMiddleware');
 
 const util = new Util();
 
