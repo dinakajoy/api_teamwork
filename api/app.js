@@ -4,26 +4,20 @@ const cors = require('cors');
 const hpp = require('hpp');
 const helmet = require('helmet');
 const url = require('url');
-
-// const fs = require('fs');
-// const cloudinary = require('cloudinary').v2;
-// const multipart = require('connect-multiparty');
-// const multipartMiddleware = multipart();
-
-const userRoutes = require('./routes/userRoutes');
+const fileupload = require('express-fileupload');
 
 const app = express();
-app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 app.use(cors());
 app.use(hpp());
 app.use(helmet());
+app.use(fileupload({
+  useTempFiles: true
+}));
 
-// cloudinary.config({
-//   cloud_name: 'odinaka-joy',
-//   api_key: 'process.env.API_KEY',
-//   api_secret: 'process.env.API_SECRET',
-// });
+const userRoutes = require('./v1/routes/userRoutes');
+const gifRoutes = require('./v1/routes/gifRoutes');
 
 app.options('/*', (req, res) => {
   res.header('Access-Control-Allow-Origin', '*');
@@ -36,17 +30,20 @@ app.all('*', (req, res, next) => {
   next();
 });
 
-app.use('/api/v1/auth', userRoutes);
-
 app.get('/', (req, res) => {
-  res.json({ message: 'YAY! Congratulations! Your Are Connected To Teamwork Api. But, You Must Be Authorized To Continue!!!' });
+  res.status(200).json({ message: 'YAY! Congratulations! Your Are Connected To Teamwork Api. But, You Must Be Authorized To Continue!!!' });
 });
 
+/* * Application Routes For All Resources * */
+app.use('/api/v1/auth', userRoutes);
+app.use('/api/v1/gifs', gifRoutes);
+
+/* * Checks for use of wrong version in url and flags error * */
 app.use('/api', (req, res, next) => {
-  const path = url.parse(req.url, true);
-  const version = path.pathname.split('/');
+  const reqPath = url.parse(req.url, true);
+  const version = reqPath.pathname.split('/');
   if (version[1] !== 'v1') {
-    res.json({ message: `Sorry, Version ${version[1]} is not available` });
+    res.status(505).json({ message: `Sorry, Version ${version[1]} is not available` });
   } else {
     next();
   }
