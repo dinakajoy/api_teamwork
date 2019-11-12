@@ -11,11 +11,11 @@ describe('On Teamwork API', () => {
   describe('a POST request to "/gifs"', () => {
     it('should check if user is authenticated before adding gif', (done) => {
       chai.request(app)
-        .post('/api/v1/gifs/')
+        .post('/api/v1/gifs/gif')
         .set('Content-Type', 'application/x-www-form-urlencoded')
         .set({ Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTU3MzU2ODA5NSwiZXhwIjoxNTczNjU0NDk1fQ.0iGYd7Rh7wPiG24Kwtq_clG_82iIvOPlYIVgZJUZNKc' })
         .field('title', 'my title')
-        .attach('gif', fs.readFileSync('C:/Users/Tim/Desktop/img/gif2.gif'), 'gif2.gif')
+        .attach('gif', fs.readFileSync('./images/gif1.gif'), 'gif1.gif')
         .then((res) => {
           expect(res.status).to.equal(201);
           expect(res.body.data).to.include({
