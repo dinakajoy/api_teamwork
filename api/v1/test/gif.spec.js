@@ -17,11 +17,11 @@ describe('On Teamwork API', () => {
           expect(res.body.data).to.include({
             message: 'GIF image successfully posted'
           });
+          done();
         })
         .catch((err) => {
           console.log(err.message);
         });
-      done();
     });
   });
 });
