@@ -54,11 +54,11 @@ describe('On Teamwork API', () => {
             firstName: 'test3',
             lastName: 'test3'
           });
-          done();
         })
         .catch((err) => {
           console.log(err.message);
         });
+      done();
     });
   });
 });
