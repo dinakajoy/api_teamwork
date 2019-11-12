@@ -5,6 +5,6 @@ const router = express.Router();
 const auth = require('../middleware/authMiddleware');
 const gifController = require('../controllers/GifController');
 
-router.post('/gif', auth, gifController.createGif);
+router.post('/', auth, gifController.createGif);
 
 module.exports = router;
