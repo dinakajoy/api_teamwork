@@ -37,28 +37,4 @@ describe('On Teamwork API', () => {
       done();
     });
   });
-
-  describe('a POST request to "/auth/signin"', () => {
-    it('should login a user', (done) => {
-      const userDetails = {
-        email: 'test3@gmail.com',
-        password: 'Test3@2019'
-      };
-      chai.request(app)
-        .post('/api/v1/auth/signin')
-        .set('Accept', 'application/json')
-        .send(userDetails)
-        .then((res) => {
-          expect(res).to.have.status(200);
-          expect(res.body.data).to.include({
-            firstName: 'test3',
-            lastName: 'test3'
-          });
-        })
-        .catch((err) => {
-          console.log(err.message);
-        });
-      done();
-    });
-  });
 });
