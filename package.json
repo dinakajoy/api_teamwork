@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "pretest": "eslint .",
-    "local-test": "cross-env-shell NODE_ENV=test 'mocha ./api/v1/test/' --exit",
+    "local-test": "cross-env-shell NODE_ENV=test 'mocha ./api/v1/test/' report --exit",
     "test": "cross-env-shell NODE_ENV=test 'mocha ./api/v1/test/'",
     "test:coverage": "nyc npm run test && nyc report --reporter=lcov",
     "test:coveralls": "nyc npm run test && nyc report --reporter=text-lcov --coverage | coveralls",
