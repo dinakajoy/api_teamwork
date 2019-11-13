@@ -10,8 +10,8 @@ chai.use(chaiHttp);
 describe('On Teamwork API', () => {
   describe('a POST request to "/gifs"', () => {
     it('should check if user is authenticated before adding gif', (done) => {
-      chai.request('http://127.0.0.1:3000')
-        .post('/api/v1/gifs')
+      chai.request('http://127.0.0.1:3000/api/v1/gifs')
+        .post('/')
         .set('Content-Type', 'application/x-www-form-urlencoded')
         .set({ Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTU3MzU2ODA5NSwiZXhwIjoxNTczNjU0NDk1fQ.0iGYd7Rh7wPiG24Kwtq_clG_82iIvOPlYIVgZJUZNKc' })
         .field('title', 'my title')
