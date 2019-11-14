@@ -22,16 +22,16 @@ exports.createGif = async (req, res) => {
   ];
   const errors = validationResult(validationData);
   if (!errors.isEmpty()) {
-    util.setError(400, errors.msg);
+    util.setError(422, errors.msg);
     return util.send(res);
   }
   if (file.mimetype !== 'image/gif') {
-    util.setError(400, 'Please upload a GIF file');
+    util.setError(415, 'Please upload a GIF file');
     return util.send(res);
   }
   const cloudGifUrl = await cloudinary.uploader.upload(file.tempFilePath, (error, result) => {
     if (error) {
-      util.setError(400, error);
+      util.setError(500, error);
       return util.send(res);
     }
     return result;
@@ -56,7 +56,7 @@ exports.createGif = async (req, res) => {
     });
     return util.send(res);
   } catch (error) {
-    util.setError(400, error);
+    util.setError(500, error);
     return util.send(res);
   }
 };

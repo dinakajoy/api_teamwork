@@ -13,11 +13,15 @@ app.use(cors());
 app.use(hpp());
 app.use(helmet());
 app.use(fileupload({
-  useTempFiles: true
+  useTempFiles: true,
+  createParentPath: true,
+  safeFileNames: true,
+  preserveExtension: true
 }));
 
 const userRoutes = require('./v1/routes/userRoutes');
 const gifRoutes = require('./v1/routes/gifRoutes');
+const articleRoutes = require('./v1/routes/articleRoutes');
 
 app.options('/*', (req, res) => {
   res.header('Access-Control-Allow-Origin', '*');
@@ -37,6 +41,7 @@ app.get('/', (req, res) => {
 /* * Application Routes For All Resources * */
 app.use('/api/v1/auth', userRoutes);
 app.use('/api/v1/gifs', gifRoutes);
+app.use('/api/v1/articles', articleRoutes);
 
 /* * Checks for use of wrong version in url and flags error * */
 app.use('/api', (req, res, next) => {

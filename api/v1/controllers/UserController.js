@@ -22,7 +22,7 @@ exports.signup = async (req, res) => {
   ];
   const errors = validationResult(validationData);
   if (!errors.isEmpty()) {
-    util.setError(400, errors.msg);
+    util.setError(422, errors.msg);
     return util.send(res);
   }
   const hash = bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(8));
@@ -46,7 +46,7 @@ exports.signup = async (req, res) => {
     });
     return util.send(res);
   } catch (error) {
-    util.setError(400, error.message);
+    util.setError(500, error.message);
     return util.send(res);
   }
 };
@@ -58,7 +58,7 @@ exports.signin = async (req, res) => {
   ];
   const errors = validationResult(validationData);
   if (!errors.isEmpty()) {
-    util.setError(400, errors.msg);
+    util.setError(422, errors.msg);
     return util.send(res);
   }
   const userDetails = {
@@ -69,13 +69,13 @@ exports.signin = async (req, res) => {
     await UserService.getUser(userDetails.email)
       .then((user) => {
         if (!user || user.rows < 1) {
-          util.setError(401, 'Sorry, Your Email Does Not Exist!');
+          util.setError(404, 'Sorry, Your Email Does Not Exist!');
           return util.send(res);
         }
         const passwrd = user.rows[0].password;
         return bcrypt.compare(userDetails.password, passwrd).then((result) => {
           if (!result) {
-            util.setError(401, 'Incorrect password!');
+            util.setError(400, 'Incorrect password!');
             return util.send(res);
           }
           const token = jwt.sign(
@@ -91,7 +91,7 @@ exports.signin = async (req, res) => {
           });
           return util.send(res);
         }).catch((error) => {
-          util.setError(500, error.message);
+          util.setError(401, error.message);
           return util.send(res);
         });
       }).catch((error) => {
