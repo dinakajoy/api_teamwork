@@ -1,6 +1,5 @@
 CREATE TABLE users (
   "userId" SERIAL PRIMARY KEY,
-  "isAdmin" BOOLEAN NOT NULL DEFAULT false,
   "firstName" VARCHAR(255) NOT NULL,
   "lastName" VARCHAR(255) NOT NULL,
   "email" VARCHAR(255) NOT NULL UNIQUE,
@@ -11,5 +10,6 @@ CREATE TABLE users (
   "department" VARCHAR(255) NOT NULL,
   "address" VARCHAR(255) NOT NULL,
   "created_at" TIMESTAMP NOT NULL DEFAULT current_timestamp,
-  "updated_at" TIMESTAMP NOT NULL DEFAULT current_timestamp
+  "updated_at" TIMESTAMP NOT NULL DEFAULT current_timestamp,
+  "isAdmin" BOOLEAN NOT NULL DEFAULT false,
 );
