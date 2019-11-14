@@ -32,7 +32,7 @@ exports.createArticle = async (req, res) => {
         util.setError(err.statusCode, 'Could Not Upload Image');
         return util.send(res);
       }
-      return 
+      return file;
     });
     const result = await ArticleService.addArticle(newArticle);
     util.setSuccess(201, {
