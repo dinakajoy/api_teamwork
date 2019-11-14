@@ -46,13 +46,14 @@ exports.createGif = async (req, res) => {
   try {
     const result = await GifService.addGif(newGif);
     util.setSuccess(201, {
-      gifId: result.rows[0].gifId,
       message: 'GIF image successfully posted',
+      gifId: result.rows[0].gifId,
       title: result.rows[0].title,
       imageUrl: result.rows[0].imageUrl,
+      public_id: result.rows[0].public_id,
+      createdOn: result.rows[0].created_at,
       token: req.headers.authorization,
-      userId: result.rows[0].userId,
-      createdOn: result.rows[0].created_at
+      userId: result.rows[0].userId
     });
     return util.send(res);
   } catch (error) {
