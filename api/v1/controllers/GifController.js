@@ -94,3 +94,45 @@ exports.deleteGif = async (req, res) => {
     return util.send(res);
   }
 };
+
+exports.commentGif = async (req, res) => {
+  const validationData = [
+    check(req.body.comment).isLength({ min: 3 })
+  ];
+  const errors = validationResult(validationData);
+  if (!errors.isEmpty()) {
+    util.setError(422, errors.msg);
+    return util.send(res);
+  }
+  const gifId = +req.params.gifId;
+  const userId = await getUserId(req);
+  const commentToAdd = {
+    comment: req.body.comment,
+    type: 'gif',
+    gifId,
+    userId
+  };
+  try {
+    const result = await GifService.commentGif(commentToAdd);
+    if (!result) {
+      util.setError(400, 'Sorry, there was an error');
+      return util.send(res);
+    }
+    util.setSuccess(201, {
+      message: 'comment successfully created',
+      commentId: result.commentId,
+      gifId: result.gifId,
+      title: result.title,
+      imageUrl: result.imageUrl,
+      public_id: result.public_id,
+      createdOn: result.created_at,
+      token: req.headers.authorization,
+      comment: result.comment,
+      userId: result.userId
+    });
+    return util.send(res);
+  } catch (error) {
+    util.setError(400, error);
+    return util.send(res);
+  }
+};

@@ -177,3 +177,43 @@ exports.deleteArticle = async (req, res) => {
     return util.send(res);
   }
 };
+
+exports.commentArticle = async (req, res) => {
+  const validationData = [
+    check(req.body.comment).isLength({ min: 3 })
+  ];
+  const errors = validationResult(validationData);
+  if (!errors.isEmpty()) {
+    util.setError(422, errors.msg);
+    return util.send(res);
+  }
+  const userId = await getUserId(req);
+  const commentToAdd = {
+    comment: req.body.comment,
+    type: 'article',
+    articleId: +req.params.articleId,
+    userId
+  };
+  try {
+    const result = await ArticleService.commentArticle(commentToAdd);
+    if (!result) {
+      util.setError(400, 'Sorry, there was an error');
+      return util.send(res);
+    }
+    util.setSuccess(201, {
+      message: 'Comment successfully created',
+      articleId: result.articleId,
+      title: result.title,
+      articleImage: result.articleImage,
+      token: req.headers.authorization,
+      userId: result.userId,
+      createdOn: result.createdOn,
+      commentId: result.commentId,
+      comment: result.comment
+    });
+    return util.send(res);
+  } catch (error) {
+    util.setError(400, error);
+    return util.send(res);
+  }
+};
