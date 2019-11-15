@@ -48,6 +48,24 @@ class ArticleService {
       throw error;
     }
   }
+
+  static async deleteArticle(articleDetails) {
+    try {
+      const { rows } = pool.query('SELECT * from articles WHERE "articleId" = $1', [articleDetails.articleId]);
+      if (!rows) {
+        return 'Sorry, article was not found';
+      }
+      if (rows[0].userId === articleDetails.userId) {
+        const newArticleQuery = 'DELETE FROM articles WHERE "articleId" = ($1)';
+        const values = [`${articleDetails.articleId}`];
+        const result = await pool.query(newArticleQuery, values);
+        return result.rows[0];
+      }
+      return 'Unauthorized user';
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 module.exports = ArticleService;

@@ -105,13 +105,35 @@ exports.editArticle = async (req, res) => {
       util.setError(400, 'Sorry, there was an error');
       return util.send(res);
     }
-    util.setSuccess(201, {
+    util.setSuccess(200, {
       message: 'Article successfully updated',
       ArticleId: result.ArticleId,
       title: result.title,
       articleImage: result.articleImage,
       token: req.headers.authorization,
       createdOn: result.createdOn
+    });
+    return util.send(res);
+  } catch (error) {
+    util.setError(400, error);
+    return util.send(res);
+  }
+};
+
+exports.deleteArticle = async (req, res) => {
+  const userId = await getUserId(req);
+  const articleDetails = {
+    articleId: req.params.articleId,
+    userId
+  };
+  const result = await ArticleService.deleteArticle(articleDetails);
+  try {
+    if (!result) {
+      util.setError(400, 'Sorry, there was an error');
+      return util.send(res);
+    }
+    util.setSuccess(200, {
+      message: 'Article successfully deleted'
     });
     return util.send(res);
   } catch (error) {
