@@ -1,4 +1,5 @@
 const { check, validationResult } = require('express-validator');
+const fs = require('fs');
 
 const getUserId = require('../middleware/getUserIdMiddleware');
 const ArticleService = require('../services/ArticleService');
@@ -7,9 +8,6 @@ const Util = require('../utils/Utils');
 const util = new Util();
 
 exports.createArticle = async (req, res) => {
-  const file = req.files.articleImage;
-  const url = `${req.protocol}://${req.get('host')}`;
-  console.log(url);
   const validationData = [
     check(req.body.title).isLength({ min: 3 }),
     check(req.body.article).isLength({ min: 20 })
@@ -19,27 +17,45 @@ exports.createArticle = async (req, res) => {
     util.setError(422, errors.msg);
     return util.send(res);
   }
+  let file;
+  let url;
+  let newArticle;
   const userId = await getUserId(req);
-  const newArticle = {
-    categoryId: req.body.categoryId,
-    title: req.body.title,
-    article: req.body.article,
-    articleImage: `${url}/api/v1/images/articles/${Date.now()}_${file.name}`,
-    userId
-  };
-  try {
-    const result = await ArticleService.createArticle(newArticle);
-    if (!result) {
-      util.setError(500, 'Sorry, there was an error');
-      return util.send(res);
-    }
-    file.mv(`./api/v1/images/articles/${Date.now()}_$file.name}.jpg`, (err) => {
+  let result;
+  if (req.files) {
+    file = req.files.articleImage;
+    url = `${req.protocol}://${req.get('host')}`;
+    const img = `/api/v1/images/articles/${Date.now()}_${file.name}`;
+    file.mv(`.${img}`, (err) => {
       if (err) {
         util.setError(err.statusCode, 'Could Not Upload Image');
         return util.send(res);
       }
       return file;
     });
+    newArticle = {
+      categoryId: req.body.categoryId,
+      title: req.body.title,
+      article: req.body.article,
+      articleImage: `${url}${img}`,
+      userId
+    };
+    result = await ArticleService.createArticleWithImage(newArticle);
+  } else {
+    newArticle = {
+      categoryId: req.body.categoryId,
+      title: req.body.title,
+      article: req.body.article,
+      userId
+    };
+    result = await ArticleService.createArticle(newArticle);
+    console.log('No');
+  }
+  try {
+    if (!result) {
+      util.setError(500, 'Sorry, there was an error');
+      return util.send(res);
+    }
     util.setSuccess(201, {
       message: 'Article successfully posted',
       articleId: result.articleId,
@@ -71,10 +87,11 @@ exports.editArticle = async (req, res) => {
   let newArticle;
   const userId = await getUserId(req);
   let result;
-  if (req.file) {
+  if (req.files) {
     file = req.files.articleImage;
     url = `${req.protocol}://${req.get('host')}`;
-    file.mv(`./api/v1/images/articles/${Date.now()}_$file.name}.jpg`, (err) => {
+    const img = `/api/v1/images/articles/${Date.now()}_${file.name}`;
+    file.mv(`.${img}`, (err) => {
       if (err) {
         util.setError(err.statusCode, 'Could Not Upload Image');
         return util.send(res);
@@ -86,7 +103,7 @@ exports.editArticle = async (req, res) => {
       categoryId: req.body.categoryId,
       title: req.body.title,
       article: req.body.article,
-      articleImage: `${url}/api/v1/images/articles/${Date.now()}_${file.name}.jpg`,
+      articleImage: `${url}${img}`,
       userId
     };
     result = await ArticleService.editArticle(newArticle);
@@ -107,7 +124,7 @@ exports.editArticle = async (req, res) => {
     }
     util.setSuccess(200, {
       message: 'Article successfully updated',
-      ArticleId: result.ArticleId,
+      articleId: result.articleId,
       title: result.title,
       articleImage: result.articleImage,
       token: req.headers.authorization,
@@ -123,17 +140,36 @@ exports.editArticle = async (req, res) => {
 exports.deleteArticle = async (req, res) => {
   const userId = await getUserId(req);
   const articleDetails = {
-    articleId: req.params.articleId,
+    articleId: +req.params.articleId,
     userId
   };
   const result = await ArticleService.deleteArticle(articleDetails);
+
+  const filePath = `${result.articleImage}`;
+  if (filePath !== 'poster.jpg') {
+    const path = filePath.split('/');
+    const mainFilePath = `./api/v1/images/articles/${path[7]}`;
+    fs.unlink(mainFilePath, (err) => {
+      if (err) {
+        util.setError(400, 'Could not remove file');
+        return util.send(res);
+      }
+      return 'success';
+    });
+  }
   try {
     if (!result) {
       util.setError(400, 'Sorry, there was an error');
       return util.send(res);
     }
     util.setSuccess(200, {
-      message: 'Article successfully deleted'
+      message: 'Article successfully deleted',
+      articleId: result.articleId,
+      title: result.title,
+      articleImage: result.articleImage,
+      token: req.headers.authorization,
+      userId: result.userId,
+      createdOn: result.createdOn
     });
     return util.send(res);
   } catch (error) {

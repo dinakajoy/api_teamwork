@@ -3,7 +3,7 @@ CREATE TABLE articles (
   "categoryId" SERIAL REFERENCES categories ("categoryId"),
   "title" VARCHAR(255) NOT NULL,
   "article" TEXT NOT NULL,
-  "articleImage" VARCHAR(255),
+  "articleImage" VARCHAR(255) DEFAULT 'poster.jpg',
   "createdOn" TIMESTAMP DEFAULT current_timestamp,
   "updatedOn" TIMESTAMP DEFAULT current_timestamp,
   "userId" SERIAL REFERENCES users ("userId")

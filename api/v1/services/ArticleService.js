@@ -4,6 +4,17 @@ const pool = require('../config/dbConfig');
 class ArticleService {
   static async createArticle(newArticle) {
     try {
+      const newArticleQuery = 'INSERT INTO articles ("categoryId", "title", "article", "userId") VALUES($1, $2, $3, $4) RETURNING *';
+      const values = [`${newArticle.categoryId}`, `${newArticle.title}`, `${newArticle.article}`, `${newArticle.userId}`];
+      const { rows } = await pool.query(newArticleQuery, values);
+      return rows[0];
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async createArticleWithImage(newArticle) {
+    try {
       const newArticleQuery = 'INSERT INTO articles ("categoryId", "title", "article", "articleImage", "userId") VALUES($1, $2, $3, $4, $5) RETURNING *';
       const values = [`${newArticle.categoryId}`, `${newArticle.title}`, `${newArticle.article}`, `${newArticle.articleImage}`, `${newArticle.userId}`];
       const { rows } = await pool.query(newArticleQuery, values);
@@ -25,7 +36,7 @@ class ArticleService {
         const result = await pool.query(newArticleQuery, values);
         return result.rows[0];
       }
-      return 'Unauthorized user';
+      return rows[0];
     } catch (error) {
       throw error;
     }
@@ -43,7 +54,7 @@ class ArticleService {
         const result = await pool.query(newArticleQuery, values);
         return result.rows[0];
       }
-      return 'Unauthorized user';
+      return rows[0];
     } catch (error) {
       throw error;
     }
@@ -51,17 +62,19 @@ class ArticleService {
 
   static async deleteArticle(articleDetails) {
     try {
-      const { rows } = pool.query('SELECT * from articles WHERE "articleId" = $1', [articleDetails.articleId]);
+      let deleted = [];
+      const { rows } = await pool.query(`SELECT * from articles WHERE "articleId" = ${articleDetails.articleId}`);
       if (!rows) {
         return 'Sorry, article was not found';
       }
-      if (rows[0].userId === articleDetails.userId) {
+      deleted = rows[0];
+      if (deleted.userId === articleDetails.userId) {
         const newArticleQuery = 'DELETE FROM articles WHERE "articleId" = ($1)';
         const values = [`${articleDetails.articleId}`];
-        const result = await pool.query(newArticleQuery, values);
-        return result.rows[0];
+        await pool.query(newArticleQuery, values);
+        return deleted;
       }
-      return 'Unauthorized user';
+      return rows[0];
     } catch (error) {
       throw error;
     }
