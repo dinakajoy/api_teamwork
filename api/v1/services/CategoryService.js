@@ -50,7 +50,6 @@ class CategoryService {
       const deleteCategoryQuery = 'DELETE FROM categories WHERE "categoryId" = ($1)';
       const values = [categoryId];
       const result = await pool.query(deleteCategoryQuery, values);
-      console.log(result);
       return result;
     } catch (error) {
       throw error;
