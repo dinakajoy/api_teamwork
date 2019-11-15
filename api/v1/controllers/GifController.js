@@ -17,7 +17,6 @@ cloudinary.config({
 exports.createGif = async (req, res) => {
   const file = req.files.gif;
   const validationData = [
-    check(file.name).isLength({ min: 3 }).isMimeType('image/gif'),
     check(req.body.title).isLength({ min: 3 })
   ];
   const errors = validationResult(validationData);
@@ -47,17 +46,51 @@ exports.createGif = async (req, res) => {
     const result = await GifService.addGif(newGif);
     util.setSuccess(201, {
       message: 'GIF image successfully posted',
-      gifId: result.rows[0].gifId,
-      title: result.rows[0].title,
-      imageUrl: result.rows[0].imageUrl,
-      public_id: result.rows[0].public_id,
-      createdOn: result.rows[0].created_at,
+      gifId: result.gifId,
+      title: result.title,
+      imageUrl: result.imageUrl,
+      public_id: result.public_id,
+      createdOn: result.created_at,
       token: req.headers.authorization,
-      userId: result.rows[0].userId
+      userId: result.userId
     });
     return util.send(res);
   } catch (error) {
     util.setError(500, error);
+    return util.send(res);
+  }
+};
+
+exports.deleteGif = async (req, res) => {
+  const gifId = +req.params.gifId;
+  const userId = await getUserId(req);
+  const gifToDelete = { gifId, userId };
+  const result = await GifService.deleteGif(gifToDelete);
+  await cloudinary.uploader.destroy(result.public_id, (error, success) => {
+    if (error) {
+      util.setError(500, 'Sorry, could not delete file');
+      return util.send(res);
+    }
+    return success;
+  });
+  try {
+    if (!result) {
+      util.setError(400, 'Sorry, there was an error');
+      return util.send(res);
+    }
+    util.setSuccess(200, {
+      message: 'gif post successfully deleted',
+      gifId: result.gifId,
+      title: result.title,
+      imageUrl: result.imageUrl,
+      public_id: result.public_id,
+      createdOn: result.created_at,
+      token: req.headers.authorization,
+      userId: result.userId
+    });
+    return util.send(res);
+  } catch (error) {
+    util.setError(400, error);
     return util.send(res);
   }
 };
