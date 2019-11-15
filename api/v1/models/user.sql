@@ -10,6 +10,6 @@ CREATE TABLE IF NOT EXISTS users (
   "jobRole" VARCHAR(255) NOT NULL,
   "department" VARCHAR(255) NOT NULL,
   "address" VARCHAR(255) NOT NULL,
-  "created_at" TIMESTAMP NOT NULL DEFAULT current_timestamp,
-  "updated_at" TIMESTAMP NOT NULL DEFAULT current_timestamp
+  "createdOn" TIMESTAMP NOT NULL DEFAULT current_timestamp,
+  "updatedOn" TIMESTAMP NOT NULL DEFAULT current_timestamp
 );

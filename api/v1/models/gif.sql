@@ -5,7 +5,7 @@ CREATE TABLE gifs (
   "public_id" VARCHAR(255) NOT NULL,
   "claps" INTEGER DEFAULT 0,
   "flaggedInvalid" INTEGER DEFAULT 0,
-  "created_at" TIMESTAMP DEFAULT current_timestamp,
-  "updated_at" TIMESTAMP DEFAULT current_timestamp,
+  "createdOn" TIMESTAMP DEFAULT current_timestamp,
+  "updatedOn" TIMESTAMP DEFAULT current_timestamp,
   "userId" SERIAL REFERENCES users ("userId")
 );

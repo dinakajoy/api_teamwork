@@ -22,7 +22,7 @@ app.use(fileupload({
 const userRoutes = require('./v1/routes/userRoutes');
 const gifRoutes = require('./v1/routes/gifRoutes');
 const categoryRoutes = require('./v1/routes/categoryRoutes');
-// const articleRoutes = require('./v1/routes/articleRoutes');
+const articleRoutes = require('./v1/routes/articleRoutes');
 
 app.options('/*', (req, res) => {
   res.header('Access-Control-Allow-Origin', '*');
@@ -43,7 +43,7 @@ app.get('/', (req, res) => {
 app.use('/api/v1/auth', userRoutes);
 app.use('/api/v1/gifs', gifRoutes);
 app.use('/api/v1/categories', categoryRoutes);
-// app.use('/api/v1/articles', articleRoutes);
+app.use('/api/v1/articles', articleRoutes);
 
 /* * Checks for use of wrong version in url and flags error * */
 app.use('/api', (req, res, next) => {
