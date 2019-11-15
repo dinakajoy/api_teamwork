@@ -28,4 +28,25 @@ describe('On Teamwork API', () => {
       done();
     });
   });
+
+  describe('a DELETE request to "/gifs/:gifId"', () => {
+    it('should check if user is authenticated and owner of gif before deleting gif', (done) => {
+      chai.request(app)
+        .post('/api/v1/gifs/1')
+        .set('Content-Type', 'application/x-www-form-urlencoded')
+        .set({ Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTU3MzU2ODA5NSwiZXhwIjoxNTczNjU0NDk1fQ.0iGYd7Rh7wPiG24Kwtq_clG_82iIvOPlYIVgZJUZNKc' })
+        .field('title', 'my title')
+        .attach('gif', fs.readFileSync('./api/v1/test/images/gif1.gif'), 'gif1.gif')
+        .then((res) => {
+          expect(res.status).to.equal(200);
+          expect(res.body.data).to.include({
+            message: 'gif post successfully deleted'
+          });
+        })
+        .catch((err) => {
+          console.log(err.message);
+        });
+      done();
+    });
+  });
 });
