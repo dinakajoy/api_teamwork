@@ -24,6 +24,31 @@ class ArticleService {
     }
   }
 
+  static async getArticle(articleDetails) {
+    try {
+      const getArticleQuery = `SELECT 
+              a."articleId", a.title, a."articleImage", a.article, a."createdOn", c.category, concat("firstName", ' ', "lastName") AS author
+              FROM articles a 
+              INNER JOIN users u ON a."userId" = u."userId" 
+              INNER JOIN categories c ON a."categoryId" = c."categoryId" 
+              WHERE "articleId" = $1`;
+      const getArticleComment = `SELECT 
+              c."commentId", c.comment, concat("firstName", ' ', "lastName") AS author 
+              FROM comments c
+              INNER JOIN users u ON c."userId" = u."userId"
+              WHERE type = 'article' AND "typeId" = $1
+              ORDER BY c."createdOn" DESC`;
+      const values = [articleDetails];
+      const { rows } = await pool.query(getArticleQuery, values);
+      const res = await pool.query(getArticleComment, values);
+      const article = rows[0];
+      const comment = res.rows;
+      return [article, comment];
+    } catch (error) {
+      throw error;
+    }
+  }
+
   static async editArticle(newArticle) {
     try {
       const { rows } = pool.query('SELECT * from articles WHERE "articleId" = $1', [newArticle.articleId]);
