@@ -72,6 +72,32 @@ exports.createArticle = async (req, res) => {
   }
 };
 
+exports.getArticle = async (req, res) => {
+  const article = req.params.articleId;
+  try {
+    const result = await ArticleService.getArticle(article);
+    if (!result) {
+      util.setError(400, 'Sorry, there was an error');
+      return util.send(res);
+    }
+    util.setSuccess(200, {
+      articleId: result[0].articleId,
+      title: result[0].title,
+      articleImage: result[0].articleImage,
+      article: result[0].article,
+      category: result[0].category,
+      author: result[0].author,
+      createdOn: result[0].createdOn,
+      comments: result[1],
+      token: req.headers.authorization
+    });
+    return util.send(res);
+  } catch (error) {
+    util.setError(400, error);
+    return util.send(res);
+  }
+};
+
 exports.editArticle = async (req, res) => {
   const validationData = [
     check(req.body.title).isLength({ min: 3 }),

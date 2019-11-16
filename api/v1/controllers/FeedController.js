@@ -14,8 +14,7 @@ exports.getFeed = async (req, res) => {
     util.setSuccess(200, result);
     return util.send(res);
   } catch (error) {
-    // util.setError(400, error);
-    // return util.send(res);
-    throw error;
+    util.setError(400, error);
+    return util.send(res);
   }
 };
