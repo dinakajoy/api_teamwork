@@ -50,13 +50,38 @@ exports.createGif = async (req, res) => {
       title: result.title,
       imageUrl: result.imageUrl,
       public_id: result.public_id,
-      createdOn: result.created_at,
+      createdOn: result.createdOn,
       token: req.headers.authorization,
       userId: result.userId
     });
     return util.send(res);
   } catch (error) {
     util.setError(500, error);
+    return util.send(res);
+  }
+};
+
+exports.getGif = async (req, res) => {
+  const gifId = +req.params.gifId;
+  try {
+    const result = await GifService.getGif(gifId);
+    if (!result) {
+      util.setError(400, 'Sorry, there was an error');
+      return util.send(res);
+    }
+    util.setSuccess(200, {
+      gifId: result[0].gifId,
+      title: result[0].title,
+      imageUrl: result[0].imageUrl,
+      public_id: result[0].public_id,
+      createdOn: result[0].createdOn,
+      author: result[0].author,
+      comments: result[1],
+      token: req.headers.authorization
+    });
+    return util.send(res);
+  } catch (error) {
+    util.setError(400, error);
     return util.send(res);
   }
 };
@@ -84,7 +109,7 @@ exports.deleteGif = async (req, res) => {
       title: result.title,
       imageUrl: result.imageUrl,
       public_id: result.public_id,
-      createdOn: result.created_at,
+      createdOn: result.createdOn,
       token: req.headers.authorization,
       userId: result.userId
     });
@@ -125,7 +150,7 @@ exports.commentGif = async (req, res) => {
       title: result.title,
       imageUrl: result.imageUrl,
       public_id: result.public_id,
-      createdOn: result.created_at,
+      createdOn: result.createdOn,
       token: req.headers.authorization,
       comment: result.comment,
       userId: result.userId
