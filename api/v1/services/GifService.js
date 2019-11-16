@@ -13,6 +13,30 @@ class GifService {
     }
   }
 
+  static async getGif(gifId) {
+    try {
+      const getGifQuery = `SELECT 
+              g."gifId", g.title, g."imageUrl", g.public_id, g."createdOn", concat("firstName", ' ', "lastName") AS author
+              FROM gifs g 
+              INNER JOIN users u ON g."userId" = u."userId"  
+              WHERE "gifId" = $1`;
+      const getGifComment = `SELECT 
+              c."commentId", c.comment, concat("firstName", ' ', "lastName") AS author 
+              FROM comments c
+              INNER JOIN users u ON c."userId" = u."userId"
+              WHERE type = 'gif' AND "typeId" = $1
+              ORDER BY c."createdOn" DESC`;
+      const values = [gifId];
+      const { rows } = await pool.query(getGifQuery, values);
+      const res = await pool.query(getGifComment, values);
+      const gif = rows[0];
+      const comment = res.rows;
+      return [gif, comment];
+    } catch (error) {
+      throw error;
+    }
+  }
+
   static async deleteGif(gifToDelete) {
     try {
       let deleted = [];

@@ -29,6 +29,29 @@ describe('On Teamwork API', () => {
     });
   });
 
+  describe('a GET request to "/gifs/:gifId"', () => {
+    it('should check if user is authenticated before displaying gif', (done) => {
+      chai.request(app)
+        .post('/api/v1/gifs/1')
+        .set({ Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTU3MzU2ODA5NSwiZXhwIjoxNTczNjU0NDk1fQ.0iGYd7Rh7wPiG24Kwtq_clG_82iIvOPlYIVgZJUZNKc' })
+        .field('title', 'my title')
+        .then((res) => {
+          expect(res.status).to.equal(200);
+          res.body.data.should.have.property('gifId');
+          res.body.data.should.have.property('title');
+          res.body.data.should.have.property('imageUrl');
+          res.body.data.should.have.property('public_id');
+          res.body.data.should.have.property('createdOn');
+          res.body.data.should.have.property('author');
+          res.body.data.should.have.property('comment');
+        })
+        .catch((err) => {
+          console.log(err.message);
+        });
+      done();
+    });
+  });
+
   describe('a DELETE request to "/gifs/:gifId"', () => {
     it('should check if user is authenticated and owner of gif before deleting gif', (done) => {
       chai.request(app)
