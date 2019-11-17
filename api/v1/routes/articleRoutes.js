@@ -10,5 +10,6 @@ router.get('/:articleId', auth, articleController.getArticle);
 router.patch('/:articleId', auth, articleController.editArticle);
 router.delete('/:articleId', auth, articleController.deleteArticle);
 router.post('/:articleId/comment', auth, articleController.commentArticle);
+router.post('/:articleId/flag', auth, articleController.flagArticle);
 
 module.exports = router;

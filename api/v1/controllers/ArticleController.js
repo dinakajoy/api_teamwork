@@ -243,3 +243,40 @@ exports.commentArticle = async (req, res) => {
     return util.send(res);
   }
 };
+
+exports.flagArticle = async (req, res) => {
+  const userId = await getUserId(req);
+  const typeId = +req.params.articleId;
+  const flagToAdd = {
+    type: 'article',
+    typeId,
+    userId
+  };
+  try {
+    const result = await ArticleService.flagArticle(flagToAdd);
+    if (!result) {
+      util.setError(400, 'Sorry, there was an error');
+      return util.send(res);
+    }
+    if (result[0] === 'true') {
+      util.setSuccess(201, {
+        message: result[1],
+        token: req.headers.authorization
+      });
+      return util.send(res);
+    }
+    util.setSuccess(201, {
+      message: 'Article successfully flagged as inappropriate',
+      flagId: result[1].flagId,
+      userId: result[1].userId,
+      typeId: result[1].typeId,
+      type: result[1].type,
+      createdOn: result[1].createdOn,
+      token: req.headers.authorization
+    });
+    return util.send(res);
+  } catch (error) {
+    util.setError(400, error);
+    return util.send(res);
+  }
+};
