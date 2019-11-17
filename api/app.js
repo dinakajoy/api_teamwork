@@ -24,6 +24,8 @@ const gifRoutes = require('./v1/routes/gifRoutes');
 const categoryRoutes = require('./v1/routes/categoryRoutes');
 const articleRoutes = require('./v1/routes/articleRoutes');
 const feedRoute = require('./v1/routes/feedRoute');
+const commentRoute = require('./v1/routes/commentRoute');
+const flagRoute = require('./v1/routes/flagRoute');
 
 app.options('/*', (req, res) => {
   res.header('Access-Control-Allow-Origin', '*');
@@ -46,6 +48,8 @@ app.use('/api/v1/gifs', gifRoutes);
 app.use('/api/v1/categories', categoryRoutes);
 app.use('/api/v1/articles', articleRoutes);
 app.use('/api/v1/feed', feedRoute);
+app.use('/api/v1/comments', commentRoute);
+app.use('/api/v1/flags', flagRoute);
 
 /* * Checks for use of wrong version in url and flags error * */
 app.use('/api', (req, res, next) => {

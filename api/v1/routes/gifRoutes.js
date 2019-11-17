@@ -9,5 +9,6 @@ router.post('/', auth, gifController.createGif);
 router.get('/:gifId', auth, gifController.getGif);
 router.delete('/:gifId', auth, gifController.deleteGif);
 router.post('/:gifId/comment', auth, gifController.commentGif);
+router.post('/:gifId/flag', auth, gifController.flagGif);
 
 module.exports = router;
