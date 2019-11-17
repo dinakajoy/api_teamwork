@@ -69,6 +69,27 @@ exports.getCategories = async (req, res) => {
   }
 };
 
+exports.getArticleCategory = async (req, res) => {
+  const categoryId = req.params.categoryId;
+  try {
+    const result = await CategoryService.getArticleCategory(categoryId);
+    if (result) {
+      util.setSuccess(200, {
+        categoryId: result[0].categoryId,
+        category: result[0].category,
+        article: result[1],
+        token: req.headers.authorization
+      });
+      return util.send(res);
+    }
+    util.setError(404, 'Not Found');
+    return util.send(res);
+  } catch (error) {
+    util.setError(400, error);
+    return util.send(res);
+  }
+};
+
 exports.editCategory = async (req, res) => {
   const validationData = [
     check(req.body.category).isLength({ min: 3 })
