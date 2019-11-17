@@ -15,7 +15,7 @@ class CategoryService {
 
   static async getCategory(categoryId) {
     try {
-      const getCategoryQuery = 'SELECT * FROM categories WHERE "categoryId" = $1';
+      const getCategoryQuery = 'SELECT categoryId, category FROM categories WHERE "categoryId" = $1';
       const values = [categoryId];
       const { rows } = await pool.query(getCategoryQuery, values);
       return rows[0];
@@ -26,9 +26,27 @@ class CategoryService {
 
   static async getCategories() {
     try {
-      const getCategoriesQuery = 'SELECT * FROM categories';
+      const getCategoriesQuery = 'SELECT categoryId, category FROM categories';
       const { rows } = await pool.query(getCategoriesQuery);
       return rows;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async getArticleCategory(categoryId) {
+    try {
+      const getCategoryQuery = 'SELECT "categoryId", category FROM categories WHERE "categoryId" = $1';
+      const getArticleQuery = `SELECT a."articleId", a.title, a."articleImage", a.article, a."createdOn", concat(u."firstName", ' ', u."lastName") AS author 
+      FROM articles a
+      INNER JOIN users u ON a."userId" = u."userId" 
+      WHERE a."categoryId" = $1`;
+      const values = [categoryId];
+      const { rows } = await pool.query(getCategoryQuery, values);
+      const res = await pool.query(getArticleQuery, values);
+      const category = rows[0];
+      const article = res.rows;
+      return [category, article];
     } catch (error) {
       throw error;
     }
