@@ -13,8 +13,8 @@ describe('On Teamwork API', () => {
       chai.request(app)
         .post('/api/v1/articles')
         .set('Content-Type', 'application/x-www-form-urlencoded')
-        .set({ Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTU3MzU2ODA5NSwiZXhwIjoxNTczNjU0NDk1fQ.0iGYd7Rh7wPiG24Kwtq_clG_82iIvOPlYIVgZJUZNKc' })
-        .field('categoryId', '3')
+        .set({ Authorization: process.env.TOKEN })
+        .field('categoryId', '1')
         .field('title', 'my title')
         .field('article', 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestiae, esse voluptatem unde vitae iste nisi, dolore ipsam sit ut non')
         .attach('articleImage', fs.readFileSync('./api/v1/test/images/eight.jpg'), 'eight.jpg')
@@ -23,20 +23,21 @@ describe('On Teamwork API', () => {
           expect(res.body.data).to.include({
             message: 'Article successfully posted'
           });
+          done();
         })
         .catch((err) => {
           console.log(err.message);
+          done();
         });
-      done();
     });
   });
 
   describe('a PATCH request to "/articles/:articleId"', () => {
     it('should check if user is authenticated and author before editing article', (done) => {
       chai.request(app)
-        .patch('/api/v1/articles')
+        .patch('/api/v1/articles/1')
         .set('Content-Type', 'application/x-www-form-urlencoded')
-        .set({ Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTU3MzU2ODA5NSwiZXhwIjoxNTczNjU0NDk1fQ.0iGYd7Rh7wPiG24Kwtq_clG_82iIvOPlYIVgZJUZNKc' })
+        .set({ Authorization: process.env.TOKEN })
         .field('articleId', '1')
         .field('categoryId', '3')
         .field('title', 'my title edited')
@@ -46,31 +47,12 @@ describe('On Teamwork API', () => {
           expect(res.body.data).to.include({
             message: 'Article successfully updated'
           });
+          done();
         })
         .catch((err) => {
           console.log(err.message);
+          done();
         });
-      done();
-    });
-  });
-
-  describe('a DELETE request to "/articles/:articleId"', () => {
-    it('should check if user is authenticated and author before deleting article', (done) => {
-      chai.request(app)
-        .delete('/api/v1/articles')
-        .set('Content-Type', 'application/json')
-        .set({ Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTU3MzU2ODA5NSwiZXhwIjoxNTczNjU0NDk1fQ.0iGYd7Rh7wPiG24Kwtq_clG_82iIvOPlYIVgZJUZNKc' })
-        .field('articleId', '1')
-        .then((res) => {
-          expect(res.status).to.equal(200);
-          expect(res.body.data).to.include({
-            message: 'Article successfully deleted'
-          });
-        })
-        .catch((err) => {
-          console.log(err.message);
-        });
-      done();
     });
   });
 
@@ -78,42 +60,39 @@ describe('On Teamwork API', () => {
     it('should check if user is authenticated before returning article details', (done) => {
       chai.request(app)
         .get('/api/v1/articles/1')
-        .set({ Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTU3MzU2ODA5NSwiZXhwIjoxNTczNjU0NDk1fQ.0iGYd7Rh7wPiG24Kwtq_clG_82iIvOPlYIVgZJUZNKc' })
-        .field('articleId', '1')
+        .set({ Authorization: process.env.TOKEN })
         .then((res) => {
           expect(res.status).to.equal(200);
-          res.body.data.should.have.property('articleId');
-          res.body.data.should.have.property('title');
-          res.body.data.should.have.property('article');
-          res.body.data.should.have.property('articleImage');
-          res.body.data.should.have.property('category');
-          res.body.data.should.have.property('createdOn');
-          res.body.data.should.have.property('author');
-          res.body.data.should.have.property('comment');
+          done();
         })
         .catch((error) => {
           console.log(error.message);
+          done();
         });
-      done();
     });
   });
 
   describe('a POST request to "/articles/:articleId/comment"', () => {
     it('should check if user is authenticated before posting comment for article', (done) => {
+      const comment = {
+        comment: 'New comment'
+      };
       chai.request(app)
-        .delete('/api/v1/articles/1/comment')
+        .post('/api/v1/articles/1/comment')
         .set('Content-Type', 'application/json')
-        .set({ Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTU3MzU2ODA5NSwiZXhwIjoxNTczNjU0NDk1fQ.0iGYd7Rh7wPiG24Kwtq_clG_82iIvOPlYIVgZJUZNKc' })
+        .set({ Authorization: process.env.TOKEN })
+        .send(comment)
         .then((res) => {
           expect(res.status).to.equal(201);
           expect(res.body.data).to.include({
             message: 'Comment successfully created'
           });
+          done();
         })
         .catch((err) => {
           console.log(err.message);
+          done();
         });
-      done();
     });
   });
 });

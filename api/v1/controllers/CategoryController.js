@@ -1,20 +1,9 @@
-const { check, validationResult } = require('express-validator');
-
 const CategoryService = require('../services/CategoryService');
 const Util = require('../utils/Utils');
 
 const util = new Util();
 
 exports.createCategory = async (req, res) => {
-  const validationData = [
-    check(req.body.category).isLength({ min: 3 })
-  ];
-  const errors = validationResult(validationData);
-  if (!errors.isEmpty()) {
-    util.setError(422, errors.msg);
-    return util.send(res);
-  }
-  console.log(req.body.category);
   try {
     const result = await CategoryService.createCategory(req.body.category);
     util.setSuccess(201, {
@@ -91,14 +80,6 @@ exports.getArticleCategory = async (req, res) => {
 };
 
 exports.editCategory = async (req, res) => {
-  const validationData = [
-    check(req.body.category).isLength({ min: 3 })
-  ];
-  const errors = validationResult(validationData);
-  if (!errors.isEmpty()) {
-    util.setError(422, errors.msg);
-    return util.send(res);
-  }
   const editCategory = {
     category: req.body.category,
     categoryId: req.params.categoryId

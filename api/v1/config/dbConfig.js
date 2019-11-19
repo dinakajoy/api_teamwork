@@ -31,4 +31,5 @@ if (!pool) {
     console.log('connected to the Database Successfully');
   });
 }
+
 module.exports = pool;
