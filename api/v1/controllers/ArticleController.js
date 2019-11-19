@@ -1,4 +1,3 @@
-const { check, validationResult } = require('express-validator');
 const fs = require('fs');
 
 const getUserId = require('../middleware/getUserIdMiddleware');
@@ -8,23 +7,33 @@ const Util = require('../utils/Utils');
 const util = new Util();
 
 exports.createArticle = async (req, res) => {
-  const validationData = [
-    check(req.body.title).isLength({ min: 3 }),
-    check(req.body.article).isLength({ min: 20 })
-  ];
-  const errors = validationResult(validationData);
-  if (!errors.isEmpty()) {
-    util.setError(422, errors.msg);
-    return util.send(res);
-  }
-  let file;
-  let url;
   let newArticle;
   const userId = await getUserId(req);
   let result;
   if (req.files) {
-    file = req.files.articleImage;
-    url = `${req.protocol}://${req.get('host')}`;
+    const file = req.files.articleImage;
+    const mimetype = file.mimetype;
+    let filetype;
+    switch (mimetype) {
+      case 'image/jpg':
+        filetype = 'jpg';
+        break;
+      case 'image/jpeg':
+        filetype = 'jpg';
+        break;
+      case 'image/png':
+        filetype = 'png';
+        break;
+      default:
+        filetype = '';
+        break;
+    }
+    if (!filetype || filetype === '') {
+      util.setError(422, 'Wrong file type');
+      return util.send(res);
+    }
+    file.name.split(' ').join('');
+    const url = `${req.protocol}://${req.get('host')}`;
     const img = `/api/v1/images/articles/${Date.now()}_${file.name}`;
     file.mv(`.${img}`, (err) => {
       if (err) {
@@ -49,7 +58,6 @@ exports.createArticle = async (req, res) => {
       userId
     };
     result = await ArticleService.createArticle(newArticle);
-    console.log('No');
   }
   try {
     if (!result) {
@@ -99,23 +107,33 @@ exports.getArticle = async (req, res) => {
 };
 
 exports.editArticle = async (req, res) => {
-  const validationData = [
-    check(req.body.title).isLength({ min: 3 }),
-    check(req.body.article).isLength({ min: 20 })
-  ];
-  const errors = validationResult(validationData);
-  if (!errors.isEmpty()) {
-    util.setError(422, errors.msg);
-    return util.send(res);
-  }
-  let file;
-  let url;
   let newArticle;
   const userId = await getUserId(req);
   let result;
   if (req.files) {
-    file = req.files.articleImage;
-    url = `${req.protocol}://${req.get('host')}`;
+    const file = req.files.articleImage;
+    const mimetype = file.mimetype;
+    let filetype;
+    switch (mimetype) {
+      case 'image/jpg':
+        filetype = 'jpg';
+        break;
+      case 'image/jpeg':
+        filetype = 'jpg';
+        break;
+      case 'image/png':
+        filetype = 'png';
+        break;
+      default:
+        filetype = '';
+        break;
+    }
+    if (!filetype || filetype === '') {
+      util.setError(422, 'Wrong file type');
+      return util.send(res);
+    }
+    file.name.split(' ').join('');
+    const url = `${req.protocol}://${req.get('host')}`;
     const img = `/api/v1/images/articles/${Date.now()}_${file.name}`;
     file.mv(`.${img}`, (err) => {
       if (err) {
@@ -205,14 +223,6 @@ exports.deleteArticle = async (req, res) => {
 };
 
 exports.commentArticle = async (req, res) => {
-  const validationData = [
-    check(req.body.comment).isLength({ min: 3 })
-  ];
-  const errors = validationResult(validationData);
-  if (!errors.isEmpty()) {
-    util.setError(422, errors.msg);
-    return util.send(res);
-  }
   const userId = await getUserId(req);
   const commentToAdd = {
     comment: req.body.comment,

@@ -1,5 +1,6 @@
 const chai = require('chai');
 const chaiHttp = require('chai-http');
+require('dotenv').config();
 
 const expect = chai.expect;
 
@@ -11,10 +12,10 @@ describe('On Teamwork API', () => {
     it('should ensure request is from an admin before creating a user', (done) => {
       const user = {
         isAdmin: false,
-        firstName: 'test2',
-        lastName: 'test2',
-        email: 'test2@gmail.com',
-        password: 'Test2@2019',
+        firstName: 'tester',
+        lastName: 'tester',
+        email: 'tester@gmail.com',
+        password: 'Test@g2019',
         gender: 'male',
         jobRole: 'procurement',
         department: 'sales',
@@ -23,27 +24,27 @@ describe('On Teamwork API', () => {
       chai.request(app)
         .post('/api/v1/auth/create-user')
         .set('Accept', 'application/json')
-        .set({ Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTU3Mzc2MTkzNCwiZXhwIjoxNTczODQ4MzM0fQ.zgnqPudS-6snjPH_O1pnCns-SFtGYyM55bpOHDBQkHU' })
+        .set({ Authorization: process.env.TOKEN })
         .send(user)
         .then((res) => {
-          expect(res.status).to.equal(201);
+          expect(res).to.have.status(201);
           expect(res.body.data).to.include({
             message: 'User account successfully created'
           });
-          expect(res.body.errors.length).to.be.equal(0);
+          done();
         })
         .catch((err) => {
           console.log(err.message);
+          done();
         });
-      done();
     });
   });
 
   describe('a POST request to "/auth/signin"', () => {
     it('should login a user', (done) => {
       const userDetails = {
-        email: 'test3@gmail.com',
-        password: 'Test3@2019'
+        email: 'admin@gmail.com',
+        password: 'Admin@2019'
       };
       chai.request(app)
         .post('/api/v1/auth/signin')
@@ -51,15 +52,41 @@ describe('On Teamwork API', () => {
         .send(userDetails)
         .then((res) => {
           expect(res).to.have.status(200);
-          expect(res.body.data).to.include({
-            firstName: 'test3',
-            lastName: 'test3'
-          });
+          done();
         })
         .catch((err) => {
           console.log(err.message);
+          done();
         });
-      done();
+    });
+  });
+
+  describe('a PATCH request to "/auth/edit-user/:userId"', () => {
+    it('should update user account after verifying requester is an admin', (done) => {
+      const userDetails = {
+        isAdmin: false,
+        firstName: 'tester',
+        lastName: 'tester',
+        email: 'tester2@gmail.com',
+        password: 'Tester@2019',
+        gender: 'male',
+        jobRole: 'procurement',
+        department: 'sales',
+        address: '5 eleki street, port harcourt, nigeria'
+      };
+      chai.request(app)
+        .patch('/api/v1/edit-user/8')
+        .set('Accept', 'application/json')
+        .set({ Authorization: process.env.TOKEN })
+        .send(userDetails)
+        .then((res) => {
+          expect(res).to.have.status(200);
+          done();
+        })
+        .catch((err) => {
+          console.log(err.message);
+          done();
+        });
     });
   });
 });

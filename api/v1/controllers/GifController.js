@@ -1,4 +1,3 @@
-const { check, validationResult } = require('express-validator');
 const cloudinary = require('cloudinary').v2;
 require('dotenv').config();
 
@@ -16,14 +15,6 @@ cloudinary.config({
 
 exports.createGif = async (req, res) => {
   const file = req.files.gif;
-  const validationData = [
-    check(req.body.title).isLength({ min: 3 })
-  ];
-  const errors = validationResult(validationData);
-  if (!errors.isEmpty()) {
-    util.setError(422, errors.msg);
-    return util.send(res);
-  }
   if (file.mimetype !== 'image/gif') {
     util.setError(415, 'Please upload a GIF file');
     return util.send(res);
@@ -121,14 +112,6 @@ exports.deleteGif = async (req, res) => {
 };
 
 exports.commentGif = async (req, res) => {
-  const validationData = [
-    check(req.body.comment).isLength({ min: 3 })
-  ];
-  const errors = validationResult(validationData);
-  if (!errors.isEmpty()) {
-    util.setError(422, errors.msg);
-    return util.send(res);
-  }
   const gifId = +req.params.gifId;
   const userId = await getUserId(req);
   const commentToAdd = {
@@ -140,11 +123,11 @@ exports.commentGif = async (req, res) => {
   try {
     const result = await GifService.commentGif(commentToAdd);
     if (!result) {
-      util.setError(400, 'Sorry, there was an error');
+      util.setError(500, 'Sorry, there was an error');
       return util.send(res);
     }
     util.setSuccess(201, {
-      message: 'comment successfully created',
+      message: 'Comment successfully created',
       commentId: result.commentId,
       gifId: result.gifId,
       title: result.title,

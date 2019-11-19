@@ -63,4 +63,9 @@ app.use('/api', (req, res, next) => {
   res.end();
 });
 
+// when a random route is inputed
+app.use('*', (req, res) => {
+  res.status(200).json({ message: 'Welcome To Teamwork Api. Please Ensure You Entered A Correct Url!!!' });
+});
+
 module.exports = app;

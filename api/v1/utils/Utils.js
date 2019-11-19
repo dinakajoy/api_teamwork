@@ -8,7 +8,6 @@ class Util {
 
   setSuccess(statusCode, data) {
     this.statusCode = statusCode;
-    // this.message = message;
     this.data = data;
     this.type = 'success';
   }

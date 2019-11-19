@@ -26,7 +26,7 @@ class CategoryService {
 
   static async getCategories() {
     try {
-      const getCategoriesQuery = 'SELECT categoryId, category FROM categories';
+      const getCategoriesQuery = 'SELECT "categoryId", category FROM categories';
       const { rows } = await pool.query(getCategoriesQuery);
       return rows;
     } catch (error) {

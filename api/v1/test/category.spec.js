@@ -9,43 +9,41 @@ const app = require('../../app');
 describe('On Teamwork API', () => {
   describe('a POST request to "/categories"', () => {
     it('should ensure request is from an admin before creating category', (done) => {
-      const category = 'Category One';
+      const category = {
+        category: 'New category'
+      };
       chai.request(app)
         .post('/api/v1/categories')
         .set('Accept', 'application/json')
-        .set({ Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTU3Mzc2MTkzNCwiZXhwIjoxNTczODQ4MzM0fQ.zgnqPudS-6snjPH_O1pnCns-SFtGYyM55bpOHDBQkHU' })
+        .set({ Authorization: process.env.TOKEN })
         .send(category)
         .then((res) => {
           expect(res.status).to.equal(201);
           expect(res.body.data).to.include({
             message: 'Category successfully added'
           });
-          expect(res.body.errors.length).to.be.equal(0);
+          done();
         })
         .catch((err) => {
           console.log(err.message);
+          done();
         });
-      done();
     });
   });
 
   describe('a GET request to "/categories"', () => {
     it('should display all categories', (done) => {
       chai.request(app)
-        .post('/api/v1/categories')
-        .set('Accept', 'application/json')
+        .get('/api/v1/categories')
         .send()
         .then((res) => {
           expect(res).to.have.status(200);
-          expect(res.body.data).to.include({
-            categoryId: 1,
-            category: 'Category One'
-          });
+          done();
         })
         .catch((err) => {
           console.log(err.message);
+          done();
         });
-      done();
     });
   });
 
@@ -53,23 +51,36 @@ describe('On Teamwork API', () => {
     it('should display all articles related a specific category', (done) => {
       chai.request(app)
         .get('/api/v1/categories/1/articles')
-        .set({ Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTU3MzU2ODA5NSwiZXhwIjoxNTczNjU0NDk1fQ.0iGYd7Rh7wPiG24Kwtq_clG_82iIvOPlYIVgZJUZNKc' })
         .send()
         .then((res) => {
           expect(res.status).to.equal(200);
-          res.body.data.should.have.property('categoryId');
-          res.body.data.should.have.property('category');
-          res.body.data.should.have.property('articleId');
-          res.body.data.should.have.property('title');
-          res.body.data.should.have.property('article');
-          res.body.data.should.have.property('articleImage');
-          res.body.data.should.have.property('createdOn');
-          res.body.data.should.have.property('author');
+          done();
         })
         .catch((err) => {
           console.log(err.message);
+          done();
         });
-      done();
+    });
+  });
+
+  describe('a PUT request to "/categories/:categoryId"', () => {
+    it('should ensure request is from an admin before updating category', (done) => {
+      const category = {
+        category: 'New category edited'
+      };
+      chai.request(app)
+        .put('/api/v1/categories/1')
+        .set('Accept', 'application/json')
+        .set({ Authorization: process.env.TOKEN })
+        .send(category)
+        .then((res) => {
+          expect(res.status).to.equal(200);
+          done();
+        })
+        .catch((err) => {
+          console.log(err.message);
+          done();
+        });
     });
   });
 });
