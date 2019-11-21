@@ -20,12 +20,10 @@ const createUsersTable = () => {
 
   pool.query(queryText)
     .then((res) => {
-      console.log(res);
-      pool.end();
+      return res;
     })
     .catch((err) => {
-      console.log(err);
-      pool.end();
+      return err;
     });
 };
 
@@ -34,31 +32,14 @@ const dropUsersTable = () => {
   const queryText = 'DROP TABLE IF EXISTS users';
   pool.query(queryText)
     .then((res) => {
-      console.log(res);
-      pool.end();
+      return res;
     })
     .catch((err) => {
-      console.log(err);
-      pool.end();
-    });
-};
-
-const addAdmin = () => {
-  const queryText = 'INSERT INTO users ("isAdmin", "firstName", "lastName", "email", "password", "gender", "jobRole", "department", "address") VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *';
-  const values = [true, 'admin', 'admin', 'admin@gmail.com', 'Admin@2019', 'male', 'manager', 'administrative', '5 mainland street, lagos state'];
-  pool.query(queryText, values)
-    .then((res) => {
-      console.log(res);
-      pool.end();
-    })
-    .catch((err) => {
-      console.log(err);
-      pool.end();
+      return err;
     });
 };
 
 module.exports = {
   createUsersTable,
-  dropUsersTable,
-  addAdmin
+  dropUsersTable
 };

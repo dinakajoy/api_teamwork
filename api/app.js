@@ -27,13 +27,9 @@ const feedRoute = require('./v1/routes/feedRoute');
 const commentRoute = require('./v1/routes/commentRoute');
 const flagRoute = require('./v1/routes/flagRoute');
 
-app.options('/*', (req, res) => {
-  res.header('Access-Control-Allow-Origin', '*');
+app.all('*', (req, res, next) => {
   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, Content, Accept, Content-Type, Authorization, Content-Length, X-Requested-With');
-  res.sendStatus(200);
-});
-app.all('*', (req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   next();
 });

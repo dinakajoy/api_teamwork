@@ -87,21 +87,14 @@ exports.signin = async (req, res) => {
   }
 };
 
-exports.editUser = async (req, res) => {
-  const userDetails = {
-    userId: +req.params.userId,
-    isAdmin: req.body.isAdmin,
-    firstName: req.body.firstName,
-    lastName: req.body.lastName,
-    email: req.body.email,
-    gender: req.body.gender,
-    jobRole: req.body.jobRole,
-    department: req.body.department,
-    address: req.body.address
-  };
+exports.getUsers = async (req, res) => {
   try {
-    const result = await UserService.editUser(userDetails);
-    util.setSuccess(200, result);
+    const result = await UserService.getUsers();
+    if (result.length > 0) {
+      util.setSuccess(200, result);
+    } else {
+      util.setError(404, 'No user found');
+    }
     return util.send(res);
   } catch (error) {
     util.setError(500, error.message);
@@ -109,10 +102,10 @@ exports.editUser = async (req, res) => {
   }
 };
 
-exports.deleteUser = async (req, res) => {
-  const userId = +req.params.userId;
+exports.getUser = async (req, res) => {
+  const userId = req.params.userId;
   try {
-    const result = await UserService.deleteUser(userId);
+    const result = await UserService.getAdmin(userId);
     util.setSuccess(200, result);
     return util.send(res);
   } catch (error) {
@@ -193,6 +186,44 @@ exports.changePassword = async (req, res) => {
     const newDetails = { userId, password: hash };
     const resp = await UserService.changePassword(newDetails);
     util.setSuccess(200, resp);
+    return util.send(res);
+  } catch (error) {
+    util.setError(500, error.message);
+    return util.send(res);
+  }
+};
+
+exports.editUser = async (req, res) => {
+  const userDetails = {
+    userId: +req.params.userId,
+    isAdmin: req.body.isAdmin,
+    firstName: req.body.firstName,
+    lastName: req.body.lastName,
+    email: req.body.email,
+    gender: req.body.gender,
+    jobRole: req.body.jobRole,
+    department: req.body.department,
+    address: req.body.address
+  };
+  try {
+    const result = await UserService.editUser(userDetails);
+    util.setSuccess(200, result);
+    return util.send(res);
+  } catch (error) {
+    util.setError(500, error.message);
+    return util.send(res);
+  }
+};
+
+exports.deleteUser = async (req, res) => {
+  const userId = +req.params.userId;
+  try {
+    const result = await UserService.deleteUser(userId);
+    if (!result) {
+      util.setError(404, 'User with id not found');
+      return util.send(res);
+    }
+    util.setSuccess(200, result);
     return util.send(res);
   } catch (error) {
     util.setError(500, error.message);

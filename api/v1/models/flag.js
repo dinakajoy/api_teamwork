@@ -12,12 +12,10 @@ const createFlagsTable = () => {
 
   pool.query(queryText)
     .then((res) => {
-      console.log(res);
-      pool.end();
+      return res;
     })
     .catch((err) => {
-      console.log(err);
-      pool.end();
+      return err;
     });
 };
 
@@ -26,12 +24,10 @@ const dropFlagsTable = () => {
   const queryText = 'DROP TABLE IF EXISTS flags';
   pool.query(queryText)
     .then((res) => {
-      console.log(res);
-      pool.end();
+      return res;
     })
     .catch((err) => {
-      console.log(err);
-      pool.end();
+      return err;
     });
 };
 

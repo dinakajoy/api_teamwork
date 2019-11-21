@@ -8,15 +8,20 @@ chai.use(chaiHttp);
 const app = require('../../app.js');
 
 describe('On Teamwork Api', () => {
+  before(() => {
+    app.set('Access-Control-Allow-Origin', '*');
+    app.set('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+    app.set('Access-Control-Allow-Headers', 'Origin, Content, Accept, Content-Type, Authorization, Content-Length, X-Requested-With');
+  });
   describe('a GET request to "/" route', () => {
-    it('should return a json object', async () => {
-      chai.request(app).get('/', (err, res, next) => {
-        should.not.exist(err);
-        should.exist(res);
-        expect(res.status).to.equal(200);
-        expect(res.messages).to.have.property('YAY! Congratulations! Your Are Connected To Teamwork Api. But, You Must Be Authorized To Continue!!!');
-        next();
-      });
+    it('should return a json object', (done) => {
+      chai.request(app)
+        .get('/')
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.a('object');
+          done();
+        });
     });
   });
 
@@ -70,19 +75,6 @@ describe('On Teamwork Api', () => {
           expect(res.messages).to.have.property('Welcome To Teamwork Api. Please Ensure You Entered A Correct Url!!!');
           next();
         });
-    });
-  });
-
-  describe('a GET request to "/api" route', () => {
-    it('should check api version and return a json object on error', async () => {
-      chai.request(app).get('/api', (err, res, next) => {
-        if (res.status === '505') {
-          expect(res.status).to.equal(505);
-          expect(res.message).to.be.a('string');
-        } else {
-          next();
-        }
-      });
     });
   });
 });
