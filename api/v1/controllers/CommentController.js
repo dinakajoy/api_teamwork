@@ -1,6 +1,4 @@
 /* eslint-disable no-useless-catch */
-// const { check, validationResult } = require('express-validator');
-
 const getUserId = require('../middleware/getUserIdMiddleware');
 const CommentService = require('../services/CommentService');
 const Util = require('../utils/Utils');
@@ -28,7 +26,7 @@ exports.flagComment = async (req, res) => {
       return util.send(res);
     }
     util.setSuccess(201, {
-      message: 'Article successfully flagged as inappropriate',
+      message: 'Comment successfully flagged as inappropriate',
       flagId: result[1].flagId,
       userId: result[1].userId,
       typeId: result[1].typeId,

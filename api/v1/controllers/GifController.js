@@ -78,22 +78,29 @@ exports.getGif = async (req, res) => {
 };
 
 exports.deleteGif = async (req, res) => {
-  const gifId = +req.params.gifId;
-  const userId = await getUserId(req);
-  const gifToDelete = { gifId, userId };
-  const result = await GifService.deleteGif(gifToDelete);
-  await cloudinary.uploader.destroy(result.public_id, (error, success) => {
-    if (error) {
-      util.setError(500, 'Sorry, could not delete file');
-      return util.send(res);
-    }
-    return success;
-  });
+  const gif = +req.params.gifId;
+  const user = await getUserId(req);
+  const gifToDelete = {
+    gifId: gif,
+    userId: user
+  };
   try {
+    const result = await GifService.deleteGif(gifToDelete);
     if (!result) {
       util.setError(400, 'Sorry, there was an error');
       return util.send(res);
     }
+    if (result.length === 0) {
+      util.setError(404, 'Sorry, Gif not found');
+      return util.send(res);
+    }
+    await cloudinary.uploader.destroy(result.public_id, (error, success) => {
+      if (error) {
+        util.setError(500, 'Sorry, could not delete file');
+        return util.send(res);
+      }
+      return success;
+    });
     util.setSuccess(200, {
       message: 'gif post successfully deleted',
       gifId: result.gifId,

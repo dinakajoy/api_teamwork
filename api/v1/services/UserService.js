@@ -24,6 +24,15 @@ class UserService {
     }
   }
 
+  static async getUsers() {
+    try {
+      const { rows } = await pool.query('SELECT  "userId", "isAdmin", "firstName", "lastName", "email", "gender", "jobRole", "department", "address" FROM users');
+      return rows;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   static async getAdmin(getUser) {
     try {
       const getUserQuery = 'SELECT "userId", "isAdmin", "firstName", "lastName", "email", "password", "gender", "jobRole", "department", "address" FROM users WHERE "userId" = $1';
@@ -35,31 +44,9 @@ class UserService {
     }
   }
 
-  static async editUser(user) {
-    try {
-      const userQuery = 'UPDATE users SET "isAdmin" = ($2), "firstName" = ($3), "lastName" = ($4), "email" = ($5), "gender" = ($6), "jobRole" = ($7), "department" = ($8), "address" = ($9) WHERE "userId" = ($1)';
-      const values = [`${user.userId}`, `${user.isAdmin}`, `${user.firstName}`, `${user.lastName}`, `${user.email}`, `${user.gender}`, `${user.jobRole}`, `${user.department}`, `${user.address}`];
-      await pool.query(userQuery, values);
-      return 'Successfully updated account';
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  static async deleteUser(user) {
-    try {
-      const userQuery = 'DELETE FROM users WHERE "userId" = ($1)';
-      const values = [`${user}`];
-      await pool.query(userQuery, values);
-      return 'Successfully deleted account';
-    } catch (error) {
-      throw error;
-    }
-  }
-
   static async changePhoto(user) {
     try {
-      const { rows } = await pool.query('SELECT * from users WHERE "userId" = $1', [user.userId]);
+      const { rows } = await pool.query('SELECT "userId", "isAdmin", "firstName", "lastName", "email", "password", "gender", "jobRole", "department", "address" from users WHERE "userId" = $1', [user.userId]);
       if (rows === undefined || !rows[0]) {
         return 'Sorry, User was not found';
       }
@@ -77,7 +64,7 @@ class UserService {
 
   static async changePassword(user) {
     try {
-      const { rows } = await pool.query('SELECT * from users WHERE "userId" = $1', [user.userId]);
+      const { rows } = await pool.query('SELECT "userId", "isAdmin", "firstName", "lastName", "email", "password", "gender", "jobRole", "department", "address" from users WHERE "userId" = $1', [user.userId]);
       if (rows === undefined || !rows[0]) {
         return 'Sorry, User was not found';
       }
@@ -88,6 +75,33 @@ class UserService {
       const values = [`${user.userId}`, `${user.password}`];
       await pool.query(userQuery, values);
       return 'Password successfully changed';
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async editUser(user) {
+    try {
+      const userQuery = 'UPDATE users SET "isAdmin" = ($1), "firstName" = ($2), "lastName" = ($3), "email" = ($4), "gender" = ($5), "jobRole" = ($6), "department" = ($7), "address" = ($8) WHERE "userId" = ($9)';
+      const values = [`${user.isAdmin}`, `${user.firstName}`, `${user.lastName}`, `${user.email}`, `${user.gender}`, `${user.jobRole}`, `${user.department}`, `${user.address}`, `${user.userId}`];
+      await pool.query(userQuery, values);
+      return 'Successfully updated account';
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async deleteUser(user) {
+    try {
+      const deleteUsersArticles = await pool.query('DELETE FROM articles WHERE "userId" = ($1)', [user]);
+      const deleteUsersGifs = await pool.query('DELETE FROM gifs WHERE "userId" = ($1)', [user]);
+      const deleteUsersComments = await pool.query('DELETE FROM comments WHERE "userId" = ($1)', [user]);
+      const deleteUsersFlags = await pool.query('DELETE FROM flags WHERE "userId" = ($1)', [user]);
+      if ((!deleteUsersArticles || !deleteUsersGifs) || (!deleteUsersComments || !deleteUsersFlags)) {
+        return 'Sorry, could not delete user';
+      }
+      await pool.query('DELETE FROM users WHERE "userId" = ($1)', [user]);
+      return 'Successfully deleted account';
     } catch (error) {
       throw error;
     }

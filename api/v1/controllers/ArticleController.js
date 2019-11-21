@@ -88,6 +88,20 @@ exports.getArticle = async (req, res) => {
       util.setError(400, 'Sorry, there was an error');
       return util.send(res);
     }
+    if (result[1].length === 0) {
+      util.setSuccess(200, {
+        articleId: result[0].articleId,
+        title: result[0].title,
+        articleImage: result[0].articleImage,
+        article: result[0].article,
+        category: result[0].category,
+        author: result[0].author,
+        createdOn: result[0].createdOn,
+        comments: 'No comment added for this article',
+        token: req.headers.authorization
+      });
+      return util.send(res);
+    }
     util.setSuccess(200, {
       articleId: result[0].articleId,
       title: result[0].title,
@@ -143,8 +157,8 @@ exports.editArticle = async (req, res) => {
       return file;
     });
     newArticle = {
-      articleId: req.params.articleId,
-      categoryId: req.body.categoryId,
+      articleId: +req.params.articleId,
+      categoryId: +req.body.categoryId,
       title: req.body.title,
       article: req.body.article,
       articleImage: `${url}${img}`,
@@ -153,8 +167,8 @@ exports.editArticle = async (req, res) => {
     result = await ArticleService.editArticle(newArticle);
   } else {
     newArticle = {
-      articleId: req.params.articleId,
-      categoryId: req.body.categoryId,
+      articleId: +req.params.articleId,
+      categoryId: +req.body.categoryId,
       title: req.body.title,
       article: req.body.article,
       userId
@@ -167,12 +181,11 @@ exports.editArticle = async (req, res) => {
       return util.send(res);
     }
     util.setSuccess(200, {
-      message: 'Article successfully updated',
-      articleId: result.articleId,
-      title: result.title,
-      articleImage: result.articleImage,
-      token: req.headers.authorization,
-      createdOn: result.createdOn
+      message: result[0],
+      articleId: newArticle.articleId,
+      title: newArticle.title,
+      articleImage: result[1],
+      token: req.headers.authorization
     });
     return util.send(res);
   } catch (error) {
@@ -187,24 +200,23 @@ exports.deleteArticle = async (req, res) => {
     articleId: +req.params.articleId,
     userId
   };
-  const result = await ArticleService.deleteArticle(articleDetails);
-
-  const filePath = `${result.articleImage}`;
-  if (filePath !== 'poster.jpg') {
-    const path = filePath.split('/');
-    const mainFilePath = `./api/v1/images/articles/${path[7]}`;
-    fs.unlink(mainFilePath, (err) => {
-      if (err) {
-        util.setError(400, 'Could not remove file');
-        return util.send(res);
-      }
-      return 'success';
-    });
-  }
   try {
+    const result = await ArticleService.deleteArticle(articleDetails);
     if (!result) {
       util.setError(400, 'Sorry, there was an error');
       return util.send(res);
+    }
+    const filePath = `${result.articleImage}`;
+    if (filePath !== 'poster.jpg') {
+      const path = filePath.split('/');
+      const mainFilePath = `./api/v1/images/articles/${path[7]}`;
+      fs.unlink(mainFilePath, (err) => {
+        if (err) {
+          util.setError(400, 'Could not remove file');
+          return util.send(res);
+        }
+        return 'success';
+      });
     }
     util.setSuccess(200, {
       message: 'Article successfully deleted',
@@ -269,13 +281,13 @@ exports.flagArticle = async (req, res) => {
       return util.send(res);
     }
     if (result[0] === 'true') {
-      util.setSuccess(201, {
+      util.setSuccess(200, {
         message: result[1],
         token: req.headers.authorization
       });
       return util.send(res);
     }
-    util.setSuccess(201, {
+    util.setSuccess(200, {
       message: 'Article successfully flagged as inappropriate',
       flagId: result[1].flagId,
       userId: result[1].userId,

@@ -10,9 +10,7 @@ const {
 
 router.post('/', accountAuth, categoryValidationRules(), validate, categoryController.createCategory);
 router.get('/', categoryController.getCategories);
-router.get('/:categoryId', categoryController.getCategory);
+router.patch('/:categoryId', accountAuth, categoryValidationRules(), validate, categoryController.editCategory);
 router.get('/:categoryId/articles', categoryController.getArticleCategory);
-router.put('/:categoryId', accountAuth, categoryValidationRules(), validate, categoryController.editCategory);
-router.delete('/:categoryId', accountAuth, categoryController.deleteCategory);
 
 module.exports = router;

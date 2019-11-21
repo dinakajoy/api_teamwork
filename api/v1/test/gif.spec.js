@@ -17,7 +17,7 @@ describe('On Teamwork API', () => {
         .field('title', 'my title')
         .attach('gif', fs.readFileSync('./api/v1/test/images/gif2.gif'), 'gif2.gif')
         .then((res) => {
-          expect(res.status).to.equal(201);
+          expect(res).to.have.status(201);
           expect(res.body.data).to.include({
             message: 'GIF image successfully posted'
           });
@@ -64,6 +64,40 @@ describe('On Teamwork API', () => {
         })
         .catch((err) => {
           console.log(err.message);
+          done();
+        });
+    });
+  });
+
+  describe('a POST request to "/gifs/:gifId/flag"', () => {
+    it('should check if user is authenticated before flagging gif', (done) => {
+      chai.request(app)
+        .post('/api/v1/gifs/1/flag')
+        .set({ Authorization: process.env.TOKEN })
+        .send()
+        .then((res) => {
+          expect(res).to.have.status(201);
+          done();
+        })
+        .catch((err) => {
+          console.log(err.message);
+          done();
+        });
+    });
+  });
+
+  describe('a DELETE request to "/gifs/:gifId"', () => {
+    it('should check if user is authenticated before deleting gif details', (done) => {
+      chai.request(app)
+        .delete('/api/v1/gifs/2')
+        .set({ Authorization: process.env.TOKEN })
+        .send()
+        .then((res) => {
+          expect(res).to.have.status(404);
+          done();
+        })
+        .catch((error) => {
+          console.log(error.message);
           done();
         });
     });

@@ -41,8 +41,8 @@ class GifService {
     try {
       let deleted = [];
       const { rows } = await pool.query('SELECT * from gifs WHERE "gifId" = $1', [gifToDelete.gifId]);
-      if (!rows) {
-        return 'Sorry, gif not found';
+      if (!rows || rows.length === 0) {
+        return rows;
       }
       deleted = rows[0];
       if (rows[0].userId === gifToDelete.userId) {

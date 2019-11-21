@@ -1,3 +1,4 @@
+/* eslint-disable quotes */
 /* eslint-disable no-useless-catch */
 const pool = require('../config/dbConfig');
 
@@ -40,6 +41,9 @@ class ArticleService {
               ORDER BY c."createdOn" DESC`;
       const values = [articleDetails];
       const { rows } = await pool.query(getArticleQuery, values);
+      if (rows === [] || rows.length === 0) {
+        return ['Article does not exist', 'Article does not exist'];
+      }
       const res = await pool.query(getArticleComment, values);
       const article = rows[0];
       const comment = res.rows;
@@ -51,17 +55,16 @@ class ArticleService {
 
   static async editArticle(newArticle) {
     try {
-      const { rows } = pool.query('SELECT * from articles WHERE "articleId" = $1', [newArticle.articleId]);
+      const { rows } = await pool.query('SELECT * from articles WHERE "articleId" = $1', [newArticle.articleId]);
       if (!rows[0]) {
         return 'Sorry, article was not found';
       }
       if (rows[0].userId === newArticle.userId) {
         const newArticleQuery = 'UPDATE articles SET "categoryId" = ($1), "title" = ($2), "article" = ($3), "articleImage" = ($4) WHERE "articleId" = ($5)';
-        const values = [`${newArticle.categoryId}`, `${newArticle.title}`, `${newArticle.article}`, `${newArticle.articleImage}`, `${newArticle.articleId}`];
-        const result = await pool.query(newArticleQuery, values);
-        return result.rows[0];
+        const values = [newArticle.categoryId, newArticle.title, newArticle.article, newArticle.articleImage, newArticle.articleId];
+        await pool.query(newArticleQuery, values);
       }
-      return rows[0];
+      return ['Article successfully updated', newArticle.articleImage];
     } catch (error) {
       throw error;
     }
@@ -69,17 +72,16 @@ class ArticleService {
 
   static async updateArticle(newArticle) {
     try {
-      const { rows } = pool.query('SELECT * from articles WHERE "articleId" = $1', [newArticle.articleId]);
+      const { rows } = await pool.query('SELECT * from articles WHERE "articleId" = $1', [`${newArticle.articleId}`]);
       if (!rows) {
         return 'Sorry, article was not found';
       }
       if (rows[0].userId === newArticle.userId) {
         const newArticleQuery = 'UPDATE articles SET "categoryId" = ($1), "title" = ($2), "article" = ($3) WHERE "articleId" = ($4)';
-        const values = [`${newArticle.categoryId}`, `${newArticle.title}`, `${newArticle.article}`, `${newArticle.articleId}`];
-        const result = await pool.query(newArticleQuery, values);
-        return result.rows[0];
+        const values = [newArticle.categoryId, newArticle.title, newArticle.article, newArticle.articleId];
+        await pool.query(newArticleQuery, values);
       }
-      return rows[0];
+      return ['Article successfully updated', rows[0].articleImage];
     } catch (error) {
       throw error;
     }
@@ -94,6 +96,13 @@ class ArticleService {
       }
       deleted = rows[0];
       if (deleted.userId === articleDetails.userId) {
+        const deleteArticleComments = await pool.query(`DELETE FROM comments WHERE type = 'article' AND "typeId" = ($1)`, [articleDetails.articleId]);
+
+        const deleteArticleFlags = await pool.query(`DELETE FROM flags WHERE type = 'article' AND "typeId" = ($1)`, [articleDetails.articleId]);
+
+        if (!deleteArticleComments || !deleteArticleFlags) {
+          return 'Sorry, could not delete user';
+        }
         const newArticleQuery = 'DELETE FROM articles WHERE "articleId" = ($1)';
         const values = [`${articleDetails.articleId}`];
         await pool.query(newArticleQuery, values);

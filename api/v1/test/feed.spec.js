@@ -2,6 +2,7 @@ const chai = require('chai');
 const chaiHttp = require('chai-http');
 
 const expect = chai.expect;
+const should = chai.should();
 
 chai.use(chaiHttp);
 const app = require('../../app.js');
@@ -14,6 +15,8 @@ describe('On Teamwork API', () => {
         .set({ Authorization: process.env.TOKEN })
         .then((res) => {
           expect(res.status).to.equal(200);
+          should.exist(res.body.data);
+          res.body.data.should.be.a('array');
           done();
         })
         .catch((err) => {

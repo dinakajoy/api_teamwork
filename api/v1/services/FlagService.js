@@ -6,19 +6,19 @@ class FlagService {
   static async getFlags() {
     try {
       const getFlagsQuery = `SELECT 
-                f."flagId", f.type, f."createdOn", a.title, concat(u."firstName", ' ', u."lastName") AS author 
+                f."flagId", f.type, f."typeId", f."createdOn", a.title, concat(u."firstName", ' ', u."lastName") AS author 
                 FROM flags f 
                 INNER JOIN articles a ON f.type=$1 AND f."typeId"= a."articleId" 
                 INNER JOIN users u ON f."userId"=u."userId"
                 UNION
                 SELECT 
-                f."flagId", f.type, f."createdOn", g.title, concat(u."firstName", ' ', u."lastName") AS author 
+                f."flagId", f.type, f."typeId", f."createdOn", g.title, concat(u."firstName", ' ', u."lastName") AS author 
                 FROM flags f 
                 INNER JOIN gifs g ON f.type=$2 AND f."typeId"= g."gifId" 
                 INNER JOIN users u ON f."userId"=u."userId"
                 UNION
                 SELECT 
-                f."flagId", f.type, f."createdOn" ,c.comment, concat(u."firstName", ' ', u."lastName") AS author 
+                f."flagId", f.type, f."typeId", f."createdOn" ,c.comment, concat(u."firstName", ' ', u."lastName") AS author 
                 FROM flags f 
                 INNER JOIN comments c ON f.type=$3 AND f."typeId"= c."commentId" 
                 INNER JOIN users u ON f."userId"=u."userId"
@@ -59,8 +59,8 @@ class FlagService {
   static async deleteFlag(flagId) {
     try {
       const { rows } = await pool.query('SELECT "flagId", type, "typeId", "userId", "createdOn" FROM flags WHERE "flagId"=$1', [flagId]);
-      if (!rows) {
-        return 'Flag not found';
+      if (rows.length === 0 || !rows) {
+        return rows;
       }
       if (rows[0].type === 'article') {
         await pool.query('DELETE FROM articles WHERE articleId=$1', [rows[0].typeId]);

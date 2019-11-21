@@ -4,8 +4,11 @@ const Util = require('../utils/Utils');
 const util = new Util();
 
 exports.createCategory = async (req, res) => {
+  const newCategory = {
+    category: req.body.category
+  };
   try {
-    const result = await CategoryService.createCategory(req.body.category);
+    const result = await CategoryService.createCategory(newCategory);
     util.setSuccess(201, {
       message: 'Category successfully added',
       categoryId: result.categoryId,
@@ -13,26 +16,7 @@ exports.createCategory = async (req, res) => {
     });
     return util.send(res);
   } catch (error) {
-    util.setError(400, error);
-    return util.send(res);
-  }
-};
-
-exports.getCategory = async (req, res) => {
-  const categoryId = req.params.categoryId;
-  try {
-    const result = await CategoryService.getCategory(categoryId);
-    if (result) {
-      util.setSuccess(200, {
-        categoryId: result.categoryId,
-        category: result.category
-      });
-      return util.send(res);
-    }
-    util.setError(404, 'Not Found');
-    return util.send(res);
-  } catch (error) {
-    util.setError(400, error);
+    util.setError(500, error);
     return util.send(res);
   }
 };
@@ -58,11 +42,43 @@ exports.getCategories = async (req, res) => {
   }
 };
 
+exports.editCategory = async (req, res) => {
+  const editCategory = {
+    category: req.body.category,
+    categoryId: req.params.categoryId
+  };
+  try {
+    const result = await CategoryService.editCategory(editCategory);
+    if (!result) {
+      util.setError(400, 'Not Found');
+      return util.send(res);
+    }
+    util.setSuccess(200, {
+      message: 'Category updated successfully',
+      categoryId: editCategory.categoryId,
+      category: editCategory.category
+    });
+    return util.send(res);
+  } catch (error) {
+    util.setError(500, error);
+    return util.send(res);
+  }
+};
+
 exports.getArticleCategory = async (req, res) => {
   const categoryId = req.params.categoryId;
   try {
     const result = await CategoryService.getArticleCategory(categoryId);
     if (result) {
+      if (result[1].length === 0) {
+        util.setSuccess(200, {
+          categoryId: result[0].categoryId,
+          category: result[0].category,
+          article: 'No article added for this category',
+          token: req.headers.authorization
+        });
+        return util.send(res);
+      }
       util.setSuccess(200, {
         categoryId: result[0].categoryId,
         category: result[0].category,
@@ -72,46 +88,6 @@ exports.getArticleCategory = async (req, res) => {
       return util.send(res);
     }
     util.setError(404, 'Not Found');
-    return util.send(res);
-  } catch (error) {
-    util.setError(400, error);
-    return util.send(res);
-  }
-};
-
-exports.editCategory = async (req, res) => {
-  const editCategory = {
-    category: req.body.category,
-    categoryId: req.params.categoryId
-  };
-
-  try {
-    const result = await CategoryService.editCategory(editCategory);
-    if (!result) {
-      util.setError(400, 'Not Found');
-      return util.send(res);
-    }
-    util.setSuccess(200, {
-      message: 'Category updated successfully'
-    });
-    return util.send(res);
-  } catch (error) {
-    util.setError(500, error);
-    return util.send(res);
-  }
-};
-
-exports.deleteCategory = async (req, res) => {
-  const categoryId = req.params.categoryId;
-  try {
-    const result = await CategoryService.deleteCategory(categoryId);
-    if (!result) {
-      util.setError(400, 'Not Found');
-      return util.send(res);
-    }
-    util.setSuccess(200, {
-      message: 'Category deleted successfully'
-    });
     return util.send(res);
   } catch (error) {
     util.setError(400, error);

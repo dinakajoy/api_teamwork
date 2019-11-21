@@ -10,7 +10,7 @@ describe('On Teamwork API', () => {
   describe('a POST request to "/categories"', () => {
     it('should ensure request is from an admin before creating category', (done) => {
       const category = {
-        category: 'New category'
+        category: 'category next'
       };
       chai.request(app)
         .post('/api/v1/categories')
@@ -25,8 +25,7 @@ describe('On Teamwork API', () => {
           done();
         })
         .catch((err) => {
-          console.log(err.message);
-          done();
+          throw err;
         });
     });
   });
@@ -47,11 +46,16 @@ describe('On Teamwork API', () => {
     });
   });
 
-  describe('a GET request to "/categories/:categoriesId/articles"', () => {
-    it('should display all articles related a specific category', (done) => {
+  describe('a PATCH request to "/categories/:categoryId"', () => {
+    it('should ensure request is from an admin before updating category', (done) => {
+      const category = {
+        category: 'New category edited'
+      };
       chai.request(app)
-        .get('/api/v1/categories/1/articles')
-        .send()
+        .patch('/api/v1/categories/1')
+        .set('Accept', 'application/json')
+        .set({ Authorization: process.env.TOKEN })
+        .send(category)
         .then((res) => {
           expect(res.status).to.equal(200);
           done();
@@ -63,16 +67,11 @@ describe('On Teamwork API', () => {
     });
   });
 
-  describe('a PUT request to "/categories/:categoryId"', () => {
-    it('should ensure request is from an admin before updating category', (done) => {
-      const category = {
-        category: 'New category edited'
-      };
+  describe('a GET request to "/categories/:categoriesId/articles"', () => {
+    it('should display all articles related a specific category', (done) => {
       chai.request(app)
-        .put('/api/v1/categories/1')
-        .set('Accept', 'application/json')
-        .set({ Authorization: process.env.TOKEN })
-        .send(category)
+        .get('/api/v1/categories/1/articles')
+        .send()
         .then((res) => {
           expect(res.status).to.equal(200);
           done();
