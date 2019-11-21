@@ -5,10 +5,10 @@
   "main": "server.js",
   "scripts": {
     "pretest": "eslint .",   
-    "test": "cross-env-shell NODE_ENV=test nyc --reporter=text 'mocha ./api/v1/test/' --exit",
-    "test:coverage": "nyc report --reporter=lcov",
-    "test:coveralls": "nyc report --reporter=text-lcov --coverage | coveralls",
-    "coverage": "npm run test && npm run test:coveralls && npm run test:coverage",
+    "test": "cross-env-shell NODE_ENV=test 'mocha ./api/v1/test/' --exit",
+    "test:coverage": "nyc npm run test && nyc report --reporter=lcov",
+    "test:coveralls": "nyc npm run test && nyc report --reporter=text-lcov --coverage | coveralls",
+    "coverage": "npm run test:coveralls && npm run test:coverage",
     "start": "node ./api/server.js",
     "dev-server": "nodemon ./api/server.js"
   },
