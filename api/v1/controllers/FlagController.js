@@ -29,6 +29,10 @@ exports.getFlag = async (req, res) => {
       util.setError(400, 'Sorry, there was an error');
       return util.send(res);
     }
+    if (result.length === 0) {
+      util.setError(404, 'Sorry, flag not found');
+      return util.send(res);
+    }
     util.setSuccess(200, result);
     return util.send(res);
   } catch (error) {

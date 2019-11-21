@@ -13,12 +13,10 @@ const createCommentsTable = () => {
 
   pool.query(queryText)
     .then((res) => {
-      console.log(res);
-      pool.end();
+      return res;
     })
     .catch((err) => {
-      console.log(err);
-      pool.end();
+      return err;
     });
 };
 
@@ -27,12 +25,10 @@ const dropCommentsTable = () => {
   const queryText = 'DROP TABLE IF EXISTS comments';
   pool.query(queryText)
     .then((res) => {
-      console.log(res);
-      pool.end();
+      return res;
     })
     .catch((err) => {
-      console.log(err);
-      pool.end();
+      return err;
     });
 };
 

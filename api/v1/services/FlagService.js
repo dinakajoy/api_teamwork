@@ -35,8 +35,8 @@ class FlagService {
   static async getFlag(flagId) {
     try {
       const { rows } = await pool.query('SELECT "flagId", type, "typeId", "userId", "createdOn" FROM flags WHERE "flagId"=$1', [flagId]);
-      if (!rows) {
-        return 'Flag not found';
+      if (rows.length === 0 || !rows) {
+        return rows;
       }
       if (rows[0].type === 'article') {
         const result = await pool.query(`SELECT a."articleId", a.title, a."articleImage", c.category, a."createdOn", concat("firstName", ' ', "lastName") AS author FROM articles a INNER JOIN users u ON a."userId" = u."userId" INNER JOIN categories c ON a."categoryId" = c."categoryId" WHERE a."articleId"=$1`, [rows[0].typeId]);

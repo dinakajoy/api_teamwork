@@ -212,8 +212,7 @@ exports.deleteArticle = async (req, res) => {
       const mainFilePath = `./api/v1/images/articles/${path[7]}`;
       fs.unlink(mainFilePath, (err) => {
         if (err) {
-          util.setError(400, 'Could not remove file');
-          return util.send(res);
+          return err;
         }
         return 'success';
       });

@@ -15,12 +15,10 @@ const createArticlesTable = () => {
 
   pool.query(queryText)
     .then((res) => {
-      console.log(res);
-      pool.end();
+      return res;
     })
     .catch((err) => {
-      console.log(err);
-      pool.end();
+      return err;
     });
 };
 
@@ -29,19 +27,12 @@ const dropArticlesTable = () => {
   const queryText = 'DROP TABLE IF EXISTS articles';
   pool.query(queryText)
     .then((res) => {
-      console.log(res);
-      pool.end();
+      return res;
     })
     .catch((err) => {
-      console.log(err);
-      pool.end();
+      return err;
     });
 };
-
-// pool.on('remove', () => {
-//   console.log('Client has been removed successfully');
-//   process.exit(0);
-// });
 
 module.exports = {
   createArticlesTable,

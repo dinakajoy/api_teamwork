@@ -10,6 +10,7 @@ const {
 
 const userController = require('../controllers/UserController');
 
+router.post('/create-admin', accountValidationRules(), validate, userController.signup);
 router.post('/create-user', accountAuth, accountValidationRules(), validate, userController.signup);
 router.post('/signin', userValidationRules(), validate, userController.signin);
 router.get('/users', accountAuth, userController.getUsers);

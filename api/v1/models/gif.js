@@ -13,12 +13,10 @@ const createGifsTable = () => {
 
   pool.query(queryText)
     .then((res) => {
-      console.log(res);
-      pool.end();
+      return res;
     })
     .catch((err) => {
-      console.log(err);
-      pool.end();
+      return err;
     });
 };
 
@@ -27,12 +25,10 @@ const dropGifsTable = () => {
   const queryText = 'DROP TABLE IF EXISTS gifs';
   pool.query(queryText)
     .then((res) => {
-      console.log(res);
-      pool.end();
+      return res;
     })
     .catch((err) => {
-      console.log(err);
-      pool.end();
+      return err;
     });
 };
 
