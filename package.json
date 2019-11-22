@@ -6,10 +6,9 @@
   "scripts": {
     "pretest": "eslint . && node api/v1/models/index createTables && node api/v1/models/index createTables",   
     "test": "cross-env-shell NODE_ENV=test 'mocha ./api/v1/test/' --timeout 50000 --exit",
-    "generate-lcov": "nyc report --reporter=text-lcov > lcov.info",
-    "coveralls-coverage": "coveralls < lcov.info",
-    "codeclimate-coverage": "codeclimate-test-reporter < lcov.info",
-    "coverage": "nyc npm test && npm run generate-lcov && npm run coveralls-coverage && npm run codeclimate-coverage",
+    "test:coverage": "nyc npm run test && nyc report report --reporter=lcov",
+    "test:coveralls": "nyc npm run test && nyc report --reporter=text-lcov --coverage | coveralls",
+    "coverage": "npm run test:coveralls && npm run test:coverage",
     "posttest": "node api/v1/models/index dropTables && node api/v1/models/index dropTables && node api/v1/models/index dropTables",
     "start": "cross-env NODE_ENV=production node ./api/server.js",
     "dev-server": "cross-env NODE_ENV=development nodemon ./api/server.js"
