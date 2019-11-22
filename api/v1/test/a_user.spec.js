@@ -9,7 +9,7 @@ const expect = chai.expect;
 chai.use(chaiHttp);
 const app = require('../../app');
 
-describe('a POST request to "/auth/create-user"', () => {
+describe('a POST request to "/auth/create-admin"', () => {
   it('should create admin', (done) => {
     const user = {
       isAdmin: true,
