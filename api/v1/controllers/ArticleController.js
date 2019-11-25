@@ -3,6 +3,7 @@ const fs = require('fs');
 const getUserId = require('../middleware/getUserIdMiddleware');
 const ArticleService = require('../services/ArticleService');
 const Util = require('../utils/Utils');
+const Helpers = require('../helper/Helper');
 
 const util = new Util();
 
@@ -12,36 +13,13 @@ exports.createArticle = async (req, res) => {
   let result;
   if (req.files) {
     const file = req.files.articleImage;
-    const mimetype = file.mimetype;
-    let filetype;
-    switch (mimetype) {
-      case 'image/jpg':
-        filetype = 'jpg';
-        break;
-      case 'image/jpeg':
-        filetype = 'jpg';
-        break;
-      case 'image/png':
-        filetype = 'png';
-        break;
-      default:
-        filetype = '';
-        break;
-    }
+    const url = `${req.protocol}://${req.get('host')}`;
+    const img = `/api/v1/images/articles/${Date.now()}_${file.name}`;
+    const filetype = await Helpers.imageType(file, img);
     if (!filetype || filetype === '') {
       util.setError(422, 'Wrong file type');
       return util.send(res);
     }
-    file.name.split(' ').join('');
-    const url = `${req.protocol}://${req.get('host')}`;
-    const img = `/api/v1/images/articles/${Date.now()}_${file.name}`;
-    file.mv(`.${img}`, (err) => {
-      if (err) {
-        util.setError(err.statusCode, 'Could Not Upload Image');
-        return util.send(res);
-      }
-      return file;
-    });
     newArticle = {
       categoryId: req.body.categoryId,
       title: req.body.title,
@@ -64,14 +42,15 @@ exports.createArticle = async (req, res) => {
       util.setError(500, 'Sorry, there was an error');
       return util.send(res);
     }
+    const rows = result[0];
     util.setSuccess(201, {
       message: 'Article successfully posted',
-      articleId: result.articleId,
-      title: result.title,
-      articleImage: result.articleImage,
+      articleId: rows.articleId,
+      title: rows.title,
+      articleImage: rows.articleImage,
       token: req.headers.authorization,
-      userId: result.userId,
-      createdOn: result.createdOn
+      userId: rows.userId,
+      createdOn: rows.createdOn
     });
     return util.send(res);
   } catch (error) {
@@ -84,6 +63,7 @@ exports.getArticle = async (req, res) => {
   const article = req.params.articleId;
   try {
     const result = await ArticleService.getArticle(article);
+    console.log(result);
     if (!result) {
       util.setError(400, 'Sorry, there was an error');
       return util.send(res);
@@ -126,45 +106,21 @@ exports.editArticle = async (req, res) => {
   let result;
   if (req.files) {
     const file = req.files.articleImage;
-    const mimetype = file.mimetype;
-    let filetype;
-    switch (mimetype) {
-      case 'image/jpg':
-        filetype = 'jpg';
-        break;
-      case 'image/jpeg':
-        filetype = 'jpg';
-        break;
-      case 'image/png':
-        filetype = 'png';
-        break;
-      default:
-        filetype = '';
-        break;
-    }
+    const url = `${req.protocol}://${req.get('host')}`;
+    const img = `/api/v1/images/articles/${Date.now()}_${file.name}`;
+    const filetype = await Helpers.imageType(file, img);
     if (!filetype || filetype === '') {
       util.setError(422, 'Wrong file type');
       return util.send(res);
     }
-    file.name.split(' ').join('');
-    const url = `${req.protocol}://${req.get('host')}`;
-    const img = `/api/v1/images/articles/${Date.now()}_${file.name}`;
-    file.mv(`.${img}`, (err) => {
-      if (err) {
-        util.setError(err.statusCode, 'Could Not Upload Image');
-        return util.send(res);
-      }
-      return file;
-    });
     newArticle = {
-      articleId: +req.params.articleId,
-      categoryId: +req.body.categoryId,
+      categoryId: req.body.categoryId,
       title: req.body.title,
       article: req.body.article,
       articleImage: `${url}${img}`,
       userId
     };
-    result = await ArticleService.editArticle(newArticle);
+    result = await ArticleService.editArticleWithImage(newArticle);
   } else {
     newArticle = {
       articleId: +req.params.articleId,
@@ -173,19 +129,19 @@ exports.editArticle = async (req, res) => {
       article: req.body.article,
       userId
     };
-    result = await ArticleService.updateArticle(newArticle);
+    result = await ArticleService.editArticle(newArticle);
   }
   try {
     if (!result) {
-      util.setError(400, 'Sorry, there was an error');
+      util.setError(500, 'Sorry, there was an error');
       return util.send(res);
     }
-    util.setSuccess(200, {
-      message: result[0],
+    util.setSuccess(201, {
+      message: 'Article successfully posted',
       articleId: newArticle.articleId,
       title: newArticle.title,
-      articleImage: result[1],
-      token: req.headers.authorization
+      token: req.headers.authorization,
+      userId: newArticle.userId
     });
     return util.send(res);
   } catch (error) {
@@ -219,12 +175,7 @@ exports.deleteArticle = async (req, res) => {
     }
     util.setSuccess(200, {
       message: 'Article successfully deleted',
-      articleId: result.articleId,
-      title: result.title,
-      articleImage: result.articleImage,
-      token: req.headers.authorization,
-      userId: result.userId,
-      createdOn: result.createdOn
+      token: req.headers.authorization
     });
     return util.send(res);
   } catch (error) {
@@ -234,29 +185,28 @@ exports.deleteArticle = async (req, res) => {
 };
 
 exports.commentArticle = async (req, res) => {
+  const articleId = +req.params.articleId;
   const userId = await getUserId(req);
   const commentToAdd = {
     comment: req.body.comment,
     type: 'article',
-    articleId: +req.params.articleId,
+    typeId: articleId,
     userId
   };
   try {
-    const result = await ArticleService.commentArticle(commentToAdd);
-    if (!result) {
-      util.setError(400, 'Sorry, there was an error');
+    const rows = await ArticleService.commentArticle(commentToAdd);
+    if (!rows) {
+      util.setError(500, 'Sorry, there was an error');
       return util.send(res);
     }
+    const result = rows[0];
     util.setSuccess(201, {
       message: 'Comment successfully created',
-      articleId: result.articleId,
-      title: result.title,
-      articleImage: result.articleImage,
-      token: req.headers.authorization,
+      commentId: result.commentId,
+      comment: result.comment,
       userId: result.userId,
       createdOn: result.createdOn,
-      commentId: result.commentId,
-      comment: result.comment
+      token: req.headers.authorization
     });
     return util.send(res);
   } catch (error) {
@@ -269,9 +219,9 @@ exports.flagArticle = async (req, res) => {
   const userId = await getUserId(req);
   const typeId = +req.params.articleId;
   const flagToAdd = {
+    userId,
     type: 'article',
-    typeId,
-    userId
+    typeId
   };
   try {
     const result = await ArticleService.flagArticle(flagToAdd);
@@ -279,20 +229,8 @@ exports.flagArticle = async (req, res) => {
       util.setError(400, 'Sorry, there was an error');
       return util.send(res);
     }
-    if (result[0] === 'true') {
-      util.setSuccess(200, {
-        message: result[1],
-        token: req.headers.authorization
-      });
-      return util.send(res);
-    }
     util.setSuccess(200, {
-      message: 'Article successfully flagged as inappropriate',
-      flagId: result[1].flagId,
-      userId: result[1].userId,
-      typeId: result[1].typeId,
-      type: result[1].type,
-      createdOn: result[1].createdOn,
+      result,
       token: req.headers.authorization
     });
     return util.send(res);

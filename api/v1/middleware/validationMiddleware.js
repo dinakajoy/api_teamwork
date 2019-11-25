@@ -16,6 +16,22 @@ const accountValidationRules = () => {
   ];
 };
 
+const accountUpdateValidationRules = () => {
+  return [
+    body('isAdmin').isBoolean(),
+    body('firstName').isLength({ min: 3 }).trim()
+      .escape(),
+    body('lastName').isLength({ min: 3 }).trim()
+      .escape(),
+    body('email').isEmail().normalizeEmail(),
+    body('gender').isIn(['male', 'female']).trim().escape(),
+    body('jobRole').isLength({ min: 2 }).trim().escape(),
+    body('department').isLength({ min: 2 }).trim().escape(),
+    body('address').isLength({ min: 2 }).trim().escape()
+  ];
+};
+
+
 const userValidationRules = () => {
   return [
     body('email').isEmail().normalizeEmail(),
@@ -76,6 +92,7 @@ const validate = (req, res, next) => {
 
 module.exports = {
   accountValidationRules,
+  accountUpdateValidationRules,
   userValidationRules,
   passwordValidationRules,
   articleValidationRules,

@@ -1,81 +1,71 @@
-/* eslint-disable quotes */
-/* eslint-disable no-useless-catch */
-const pool = require('../config/dbConfig');
+const query = require('../config/queryConfig');
 
 class FlagService {
-  static async getFlags() {
+  // To create flag based on item (comment, article, gif)
+  static async createFlag(flagToAdd) {
+    const checkFlag = await query.queryResult('SELECT "userId", type, "typeId" FROM flags WHERE "userId" = $1 AND "typeId" = $2 AND "type" = $3', [flagToAdd.userId, flagToAdd.typeId, flagToAdd.type]);
+    if (checkFlag.length > 0) {
+      await query.queryResult('DELETE FROM flags WHERE "userId" = $1 AND "typeId" = $2 AND "type" = $3', [flagToAdd.userId, flagToAdd.typeId, flagToAdd.type]);
+      return { message: 'Successfully unflagged item' };
+    }
+    const newFlagQuery = 'INSERT INTO flags ("userId", "type", "typeId") VALUES($1, $2, $3) RETURNING *';
+    const values = [`${flagToAdd.userId}`, `${flagToAdd.type}`, `${flagToAdd.typeId}`];
     try {
-      const getFlagsQuery = `SELECT 
-                f."flagId", f.type, f."typeId", f."createdOn", a.title, concat(u."firstName", ' ', u."lastName") AS author 
-                FROM flags f 
-                INNER JOIN articles a ON f.type=$1 AND f."typeId"= a."articleId" 
-                INNER JOIN users u ON f."userId"=u."userId"
-                UNION
-                SELECT 
-                f."flagId", f.type, f."typeId", f."createdOn", g.title, concat(u."firstName", ' ', u."lastName") AS author 
-                FROM flags f 
-                INNER JOIN gifs g ON f.type=$2 AND f."typeId"= g."gifId" 
-                INNER JOIN users u ON f."userId"=u."userId"
-                UNION
-                SELECT 
-                f."flagId", f.type, f."typeId", f."createdOn" ,c.comment, concat(u."firstName", ' ', u."lastName") AS author 
-                FROM flags f 
-                INNER JOIN comments c ON f.type=$3 AND f."typeId"= c."commentId" 
-                INNER JOIN users u ON f."userId"=u."userId"
-                ORDER BY "createdOn" DESC`;
-      const values = ['article', 'gif', 'comment'];
-      const flaggedQuery = await pool.query(getFlagsQuery, values);
-      const flagged = flaggedQuery.rows;
-      return flagged;
+      await query.queryResult(newFlagQuery, values);
+      return { message: 'Successfully flagged item' };
     } catch (error) {
-      throw error;
+      return error;
     }
   }
 
-  static async getFlag(flagId) {
-    try {
-      const { rows } = await pool.query('SELECT "flagId", type, "typeId", "userId", "createdOn" FROM flags WHERE "flagId"=$1', [flagId]);
-      if (rows.length === 0 || !rows) {
-        return rows;
-      }
-      if (rows[0].type === 'article') {
-        const result = await pool.query(`SELECT a."articleId", a.title, a."articleImage", c.category, a."createdOn", concat("firstName", ' ', "lastName") AS author FROM articles a INNER JOIN users u ON a."userId" = u."userId" INNER JOIN categories c ON a."categoryId" = c."categoryId" WHERE a."articleId"=$1`, [rows[0].typeId]);
-        return result.rows[0];
-      }
-      if (rows[0].type === 'gif') {
-        const result = await pool.query(`SELECT g."gifId", g.title, g."imageUrl", g.public_id, g."createdOn", concat("firstName", ' ', "lastName") AS author FROM gifs g INNER JOIN users u ON g."userId" = u."userId" WHERE g."gifId"=$1`, [rows[0].typeId]);
-        return result.rows[0];
-      }
-      if (rows[0].type === 'comment') {
-        const result = await pool.query(`SELECT c."commentId", c.comment, c."createdOn", concat("firstName", ' ', "lastName") AS author FROM comments c INNER JOIN users u ON c."userId" = u."userId" WHERE c."commentId"=$1`, [rows[0].typeId]);
-        return result.rows[0];
-      }
-      return 'Sorry, there was an error';
-    } catch (error) {
-      throw error;
+  // To get all flags based on item (comment, article, gif)
+  static async getFlaggedItem(flagToGet) {
+    const flagQuery = `SELECT 
+                concat("firstName", ' ', "lastName") AS "Flagged by" 
+                FROM flags f 
+                INNER JOIN users u ON f."userId" = u."userId" 
+                WHERE f."typeId" = $1 AND "type" = $2`;
+    const values = [flagToGet.typeId, flagToGet.type];
+    const result = await query.queryResult(flagQuery, values);
+    if (result.length < 1 || !result) {
+      return !result;
     }
+    return result;
   }
 
-  static async deleteFlag(flagId) {
-    try {
-      const { rows } = await pool.query('SELECT "flagId", type, "typeId", "userId", "createdOn" FROM flags WHERE "flagId"=$1', [flagId]);
-      if (rows.length === 0 || !rows) {
-        return rows;
-      }
-      if (rows[0].type === 'article') {
-        await pool.query('DELETE FROM articles WHERE articleId=$1', [rows[0].typeId]);
-      }
-      if (rows[0].type === 'gif') {
-        await pool.query('DELETE FROM gifs WHERE "gifId"=$1', [rows[0].typeId]);
-      }
-      if (rows[0].type === 'comment') {
-        await pool.query('DELETE FROM comments WHERE "commentId"=$1', [rows[0].typeId]);
-      }
-      await pool.query('DELETE FROM flags WHERE "flagId"=$1', [flagId]);
-      return 'Successfully, deleted flagged item';
-    } catch (error) {
-      throw error;
+  // To get all flagged items
+  static async getFlaggedItems(flagToGet) {
+    const flagQuery = `SELECT 
+                concat("firstName", ' ', "lastName") AS "Flagged by" 
+                FROM flags f 
+                INNER JOIN users u ON f."userId" = u."userId" 
+                WHERE f."typeId" = $1 AND "type" = $2`;
+    const values = [flagToGet.typeId, flagToGet.type];
+    const result = await query.queryResult(flagQuery, values);
+    if (result.length < 1 || !result) {
+      return !result;
     }
+    return result;
+  }
+
+  // To delete all flags when item (comment, article, gif) is deleted
+  static async deleteFlagByItem(flagToDelete) {
+    const rows = await query.queryResult('SELECT "flagId", type, "typeId", "userId", "createdOn" FROM flags WHERE "typeId"=$1 && "type"=$2', [flagToDelete.typeId, flagToDelete.type]);
+    if (rows.length < 1 || !rows) {
+      return !rows;
+    }
+    await query.queryResult('DELETE FROM flags WHERE "typeId"=$1 && "type"=$2', [flagToDelete.typeId, flagToDelete.type]);
+    return rows;
+  }
+
+  // To delete all users flags when user is deleted
+  static async deleteUserFlags(userId) {
+    const rows = await query.queryResult('SELECT "flagId", type, "typeId", "userId", "createdOn" FROM flags WHERE "userId"=$1', [userId]);
+    if (rows.length < 1 || !rows) {
+      return !rows;
+    }
+    await query.queryResult('DELETE FROM flags WHERE "userId"=$1', [userId]);
+    return rows;
   }
 }
 

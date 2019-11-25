@@ -4,14 +4,15 @@
   "description": "Teamwork is an internal social network for employees of an organization. The goal of this application is to facilitate more interaction between colleagues and promote team bonding",
   "main": "server.js",
   "scripts": {
-    "pretest": "eslint . && node api/v1/models/index createTables && node api/v1/models/index createTables",   
-    "test": "cross-env-shell NODE_ENV=test 'mocha ./api/v1/test/' --timeout 50000 --exit",
-    "test:coverage": "nyc npm run test && nyc report report --reporter=lcov",
-    "test:coveralls": "nyc npm run test && nyc report --reporter=text-lcov --coverage | coveralls",
+    "lint": "eslint .",
+    "pretest": "cross-env-shell NODE_ENV=test node api/v1/models/index createAllTables",
+    "test": "cross-env-shell NODE_ENV=test nyc --reporter=text  mocha ./api/v1/test/ --timeout 50000 --exit",
+    "test:coverage": "nyc report --reporter=lcov",
+    "test:coveralls": "nyc report --reporter=text-lcov | coveralls",
     "coverage": "npm run test:coveralls && npm run test:coverage",
-    "posttest": "node api/v1/models/index dropTables && node api/v1/models/index dropTables && node api/v1/models/index dropTables",
-    "start": "cross-env NODE_ENV=production node ./api/server.js",
-    "dev-server": "cross-env NODE_ENV=development nodemon ./api/server.js"
+    "posttest": "cross-env-shell NODE_ENV=test node api/v1/models/index dropAllTables",
+    "start": "node ./api/server.js",
+    "dev-server": "nodemon ./api/server.js"
   },
   "repository": {
     "type": "git",

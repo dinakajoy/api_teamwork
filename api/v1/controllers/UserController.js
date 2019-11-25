@@ -1,217 +1,220 @@
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const Helpers = require('../helper/Helper');
 const getUserId = require('../middleware/getUserIdMiddleware');
-require('dotenv').config();
-
 const UserService = require('../services/UserService');
 const Util = require('../utils/Utils');
 
 const util = new Util();
 
-exports.signup = async (req, res) => {
-  const hash = bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(8));
-  const newUser = {
-    isAdmin: req.body.isAdmin,
-    firstName: req.body.firstName,
-    lastName: req.body.lastName,
-    email: req.body.email,
-    password: hash,
-    gender: req.body.gender,
-    jobRole: req.body.jobRole,
-    department: req.body.department,
-    address: req.body.address
-  };
+exports.signup = async (request, response) => {
+  request.body.password = await Helpers.hashPassword(request.body.password);
   try {
-    const result = await UserService.addUser(newUser);
+    const user = await UserService.createUser(request.body);
+    if (user.error) {
+      util.setError(500, user.error);
+      return util.send(response);
+    }
+    const rows = user[0];
     util.setSuccess(201, {
       message: 'User account successfully created',
-      token: req.headers.authorization,
-      userId: result.userId,
-      firstName: result.firstName,
-      lastName: result.lastName,
-      email: result.email,
-      gender: result.gender,
-      jobRole: result.jobRole,
-      department: result.department,
-      address: result.address
+      token: request.headers.authorization,
+      userId: rows.userId,
+      isAdmin: rows.isAdmin,
+      firstName: rows.firstName,
+      lastName: rows.lastName,
+      email: rows.email,
+      gender: rows.gender,
+      jobRole: rows.jobRole,
+      department: rows.department,
+      address: rows.address
     });
-    return util.send(res);
+    return util.send(response);
   } catch (error) {
-    util.setError(500, error.message);
-    return util.send(res);
+    util.setError(400, error.message);
+    return util.send(response);
   }
 };
 
-exports.signin = async (req, res) => {
-  const userDetails = {
-    email: req.body.email,
-    password: req.body.password
-  };
+exports.signin = async (request, response) => {
+  const { email, password } = request.body;
   try {
-    const user = await UserService.getUser(userDetails.email);
-    if (!user) {
-      util.setError(404, 'Sorry, your email does not exist!');
-      return util.send(res);
+    const user = await UserService.getUser(email);
+    if (!user || user.error) {
+      util.setError(500, user.error);
+      return util.send(response);
     }
-    const passwrd = user.password;
-    return bcrypt.compare(userDetails.password, passwrd).then((result) => {
-      if (!result) {
-        util.setError(400, 'Incorrect password!');
-        return util.send(res);
-      }
-      const token = jwt.sign(
-        { userId: user.userId },
-        process.env.SECRET_TOKEN,
-        { expiresIn: '24h' }
-      );
+    if (user.length < 1) {
+      util.setError(404, 'User not found');
+      return util.send(response);
+    }
+    const rows = user[0];
+    const passwrd = rows.password;
+    const pass = await Helpers.comparePassword(password, passwrd);
+    if (pass) {
+      const token = await Helpers.generateToken(rows.userId);
       util.setSuccess(200, {
         token,
-        userId: user.userId,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        picture: user.picture,
-        gender: user.gender,
-        jobRole: result.jobRole,
-        department: user.department,
-        address: user.address
+        userId: rows.userId,
+        firstName: rows.firstName,
+        lastName: rows.lastName,
+        email: rows.email,
+        picture: rows.picture,
+        gender: rows.gender,
+        jobRole: rows.jobRole,
+        department: rows.department,
+        address: rows.address
       });
-      return util.send(res);
-    }).catch((error) => {
-      util.setError(401, error.message);
-      return util.send(res);
-    });
+      return util.send(response);
+    }
+    util.setError(401, 'Invalid credentials');
+    return util.send(response);
   } catch (error) {
-    util.setError(500, error.message);
-    return util.send(res);
+    util.setError(400, error.message);
+    return util.send(response);
   }
 };
 
-exports.getUsers = async (req, res) => {
+exports.getUsers = async (request, response) => {
   try {
     const result = await UserService.getUsers();
-    if (result.length > 0) {
-      util.setSuccess(200, result);
-    } else {
-      util.setError(404, 'No user found');
+    if (result.errors) {
+      util.setError(404, result.error);
+      return util.send(response);
     }
-    return util.send(res);
-  } catch (error) {
-    util.setError(500, error.message);
-    return util.send(res);
-  }
-};
-
-exports.getUser = async (req, res) => {
-  const userId = req.params.userId;
-  try {
-    const result = await UserService.getAdmin(userId);
+    if (result.length < 1) {
+      util.setError(404, 'No user found');
+      return util.send(response);
+    }
     util.setSuccess(200, result);
-    return util.send(res);
+    return util.send(response);
   } catch (error) {
     util.setError(500, error.message);
-    return util.send(res);
+    return util.send(response);
   }
 };
 
-exports.changePhoto = async (req, res) => {
-  if (!req.files) {
-    util.setError(200, 'Please upload photo');
-    return util.send(res);
+exports.getUser = async (request, response) => {
+  const userId = request.params.userId;
+  try {
+    const result = await UserService.checkUser(userId);
+    if (result.error) {
+      util.setError(404, result.error);
+      return util.send(response);
+    }
+    if (result.length < 1) {
+      util.setError(404, 'User not found');
+      return util.send(response);
+    }
+    const user = result[0];
+    util.setSuccess(200, {
+      token: request.headers.authorization,
+      userId: user.userId,
+      isAdmin: user.isAdmin,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      gender: user.gender,
+      jobRole: user.jobRole,
+      department: user.department,
+      address: user.address
+    });
+    return util.send(response);
+  } catch (error) {
+    util.setError(500, error.message);
+    return util.send(response);
   }
-  const userId = await getUserId(req);
-  const file = req.files.picture;
-  const mimetype = file.mimetype;
-  let filetype;
-  switch (mimetype) {
-    case 'image/jpg':
-      filetype = 'jpg';
-      break;
-    case 'image/jpeg':
-      filetype = 'jpg';
-      break;
-    case 'image/png':
-      filetype = 'png';
-      break;
-    default:
-      filetype = '';
-      break;
+};
+
+exports.changePhoto = async (request, response) => {
+  const userId = await getUserId(request);
+  if (!request.files) {
+    util.setError(415, 'Please upload photo');
+    return util.send(response);
   }
+  const file = request.files.picture;
+  const url = `${request.protocol}://${request.get('host')}`;
+  const img = `/api/v1/images/users/${Date.now()}_${file.name}`;
+  const filetype = await Helpers.imageType(file, img);
   if (!filetype || filetype === '') {
     util.setError(422, 'Wrong file type');
-    return util.send(res);
+    return util.send(response);
   }
-  file.name.split(' ').join('');
-  const url = `${req.protocol}://${req.get('host')}`;
-  const img = `/api/v1/images/users/${Date.now()}_${file.name}`;
-  const userDetails = {
-    picture: `${url}${img}`,
-    userId
-  };
+  const userDetails = ['picture', `${url}${img}`, userId];
   try {
-    const result = await UserService.changePhoto(userDetails);
+    const result = await UserService.updateUser(userDetails);
     if (!result) {
-      util.setError(400, 'Sorry, there was an error');
-      return util.send(res);
+      util.setError(400, 'Invalid token');
+      return util.send(response);
     }
-    file.mv(`.${img}`, (err) => {
-      if (err) {
-        util.setError(err.statusCode, 'Could Not Upload Image');
-        return util.send(res);
-      }
-      return file;
+    const user = result[0];
+    util.setSuccess(200, {
+      message: 'Account successfully updated',
+      user
     });
-    util.setSuccess(200, result);
-    return util.send(res);
+    return util.send(response);
   } catch (error) {
     util.setError(500, error.message);
-    return util.send(res);
+    return util.send(response);
   }
 };
 
-exports.changePassword = async (req, res) => {
-  const userId = await getUserId(req);
-  const userDetails = {
-    userId,
-    email: req.body.email,
-    password: req.body.password
-  };
+exports.changePassword = async (request, response) => {
+  const userId = await getUserId(request);
   try {
-    const check = await UserService.getUser(userDetails.email);
-    if (!check) {
-      util.setError(404, 'Sorry, your email does not exist!');
-      return util.send(res);
+    const result = await UserService.getUser(request.body.email);
+    if (result.error) {
+      util.setError(404, result.error);
+      return util.send(response);
     }
-    const hash = bcrypt.hashSync(userDetails.password, bcrypt.genSaltSync(8));
-    const newDetails = { userId, password: hash };
-    const resp = await UserService.changePassword(newDetails);
-    util.setSuccess(200, resp);
-    return util.send(res);
+    if (!result) {
+      util.setError(401, 'Invalid credentials');
+      return util.send(response);
+    }
+    if (result.length < 1) {
+      util.setError(404, 'User not found');
+      return util.send(response);
+    }
+    const hash = await Helpers.hashPassword(request.body.password);
+    const newDetails = ['password', hash, userId];
+    const resp = await UserService.updateUser(newDetails);
+    if (!resp) {
+      util.setError(400, 'Invalid token');
+      return util.send(response);
+    }
+    const user = resp[0];
+    util.setSuccess(200, {
+      message: 'Account successfully updated',
+      user
+    });
+    return util.send(response);
   } catch (error) {
     util.setError(500, error.message);
-    return util.send(res);
+    return util.send(response);
   }
 };
 
-exports.editUser = async (req, res) => {
+exports.editUser = async (request, response) => {
   const userDetails = {
-    userId: +req.params.userId,
-    isAdmin: req.body.isAdmin,
-    firstName: req.body.firstName,
-    lastName: req.body.lastName,
-    email: req.body.email,
-    gender: req.body.gender,
-    jobRole: req.body.jobRole,
-    department: req.body.department,
-    address: req.body.address
+    userId: +request.params.userId,
+    isAdmin: request.body.isAdmin,
+    firstName: request.body.firstName,
+    lastName: request.body.lastName,
+    email: request.body.email,
+    gender: request.body.gender,
+    jobRole: request.body.jobRole,
+    department: request.body.department,
+    address: request.body.address
   };
   try {
     const result = await UserService.editUser(userDetails);
-    util.setSuccess(200, result);
-    return util.send(res);
+    if (!result) {
+      util.setError(404, 'Not found');
+      return util.send(response);
+    }
+    util.setSuccess(200, userDetails);
+    return util.send(response);
   } catch (error) {
     util.setError(500, error.message);
-    return util.send(res);
+    return util.send(response);
   }
 };
 
@@ -223,7 +226,8 @@ exports.deleteUser = async (req, res) => {
       util.setError(404, 'User with id not found');
       return util.send(res);
     }
-    util.setSuccess(200, result);
+    const user = result[0];
+    util.setSuccess(200, user);
     return util.send(res);
   } catch (error) {
     util.setError(500, error.message);

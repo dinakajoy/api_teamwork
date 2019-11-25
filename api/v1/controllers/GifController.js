@@ -1,17 +1,9 @@
-const cloudinary = require('cloudinary').v2;
-require('dotenv').config();
-
 const getUserId = require('../middleware/getUserIdMiddleware');
 const GifService = require('../services/GifService');
+const Helpers = require('../helper/Helper');
 const Util = require('../utils/Utils');
 
 const util = new Util();
-
-cloudinary.config({
-  cloud_name: process.env.CLOUD_NAME,
-  api_key: process.env.API_KEY,
-  api_secret: process.env.API_SECRET,
-});
 
 exports.createGif = async (req, res) => {
   const file = req.files.gif;
@@ -19,13 +11,11 @@ exports.createGif = async (req, res) => {
     util.setError(415, 'Please upload a GIF file');
     return util.send(res);
   }
-  const cloudGifUrl = await cloudinary.uploader.upload(file.tempFilePath, (error, result) => {
-    if (error) {
-      util.setError(500, error);
-      return util.send(res);
-    }
-    return result;
-  });
+  const cloudGifUrl = await Helpers.pushToCloudinary(file.tempFilePath);
+  if (!cloudGifUrl) {
+    util.setError(500, 'There was an error');
+    return util.send(res);
+  }
   const userId = await getUserId(req);
   const newGif = {
     title: req.body.title,
@@ -34,7 +24,8 @@ exports.createGif = async (req, res) => {
     userId
   };
   try {
-    const result = await GifService.addGif(newGif);
+    const row = await GifService.createGif(newGif);
+    const result = row[0];
     util.setSuccess(201, {
       message: 'GIF image successfully posted',
       gifId: result.gifId,
@@ -55,19 +46,21 @@ exports.createGif = async (req, res) => {
 exports.getGif = async (req, res) => {
   const gifId = +req.params.gifId;
   try {
-    const result = await GifService.getGif(gifId);
-    if (!result) {
+    const resp = await GifService.getGif(gifId);
+    if (!res) {
       util.setError(400, 'Sorry, there was an error');
       return util.send(res);
     }
+    const result = resp[0];
     util.setSuccess(200, {
-      gifId: result[0].gifId,
-      title: result[0].title,
-      imageUrl: result[0].imageUrl,
-      public_id: result[0].public_id,
-      createdOn: result[0].createdOn,
-      author: result[0].author,
-      comments: result[1],
+      gifId: result.gifId,
+      title: result.title,
+      imageUrl: result.imageUrl,
+      public_id: result.public_id,
+      createdOn: result.createdOn,
+      author: result.author,
+      comments: resp[1],
+      flags: resp[2],
       token: req.headers.authorization
     });
     return util.send(res);
@@ -94,13 +87,11 @@ exports.deleteGif = async (req, res) => {
       util.setError(404, 'Sorry, Gif not found');
       return util.send(res);
     }
-    await cloudinary.uploader.destroy(result.public_id, (error, success) => {
-      if (error) {
-        util.setError(500, 'Sorry, could not delete file');
-        return util.send(res);
-      }
-      return success;
-    });
+    const deleteOnCloudinary = await Helpers.deleteFromCloudinary(result.public_id);
+    if (!deleteOnCloudinary) {
+      util.setError(500, 'Sorry, could not delete file');
+      return util.send(res);
+    }
     util.setSuccess(200, {
       message: 'gif post successfully deleted',
       gifId: result.gifId,
@@ -124,26 +115,23 @@ exports.commentGif = async (req, res) => {
   const commentToAdd = {
     comment: req.body.comment,
     type: 'gif',
-    gifId,
+    typeId: gifId,
     userId
   };
   try {
-    const result = await GifService.commentGif(commentToAdd);
-    if (!result) {
+    const rows = await GifService.commentGif(commentToAdd);
+    if (!rows) {
       util.setError(500, 'Sorry, there was an error');
       return util.send(res);
     }
+    const result = rows[0];
     util.setSuccess(201, {
       message: 'Comment successfully created',
       commentId: result.commentId,
-      gifId: result.gifId,
-      title: result.title,
-      imageUrl: result.imageUrl,
-      public_id: result.public_id,
-      createdOn: result.createdOn,
-      token: req.headers.authorization,
       comment: result.comment,
-      userId: result.userId
+      userId: result.userId,
+      createdOn: result.createdOn,
+      token: req.headers.authorization
     });
     return util.send(res);
   } catch (error) {
@@ -166,20 +154,8 @@ exports.flagGif = async (req, res) => {
       util.setError(400, 'Sorry, there was an error');
       return util.send(res);
     }
-    if (result[0] === 'true') {
-      util.setSuccess(201, {
-        message: result[1],
-        token: req.headers.authorization
-      });
-      return util.send(res);
-    }
-    util.setSuccess(201, {
-      message: 'Gif successfully flagged as inappropriate',
-      flagId: result[1].flagId,
-      userId: result[1].userId,
-      typeId: result[1].typeId,
-      type: result[1].type,
-      createdOn: result[1].createdOn,
+    util.setSuccess(200, {
+      result,
       token: req.headers.authorization
     });
     return util.send(res);

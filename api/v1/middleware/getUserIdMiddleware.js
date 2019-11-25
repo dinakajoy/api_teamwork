@@ -1,8 +1,7 @@
-const jwt = require('jsonwebtoken');
-require('dotenv').config();
+const Helpers = require('../helper/Helper');
 
 module.exports = async (req) => {
   const token = req.headers.authorization.split(' ')[1];
-  const decodedToken = jwt.verify(token, process.env.SECRET_TOKEN);
+  const decodedToken = await Helpers.verifyToken(token);
   return decodedToken.userId;
 };

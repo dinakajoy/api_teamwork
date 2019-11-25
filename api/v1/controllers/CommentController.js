@@ -8,9 +8,9 @@ const util = new Util();
 exports.flagComment = async (req, res) => {
   const userId = await getUserId(req);
   const flagToAdd = {
+    userId,
     type: 'comment',
-    typeId: +req.params.commentId,
-    userId
+    typeId: +req.params.commentId
   };
   try {
     const result = await CommentService.flagComment(flagToAdd);
@@ -18,20 +18,55 @@ exports.flagComment = async (req, res) => {
       util.setError(400, 'Sorry, there was an error');
       return util.send(res);
     }
-    if (result[0] === 'true') {
-      util.setSuccess(201, {
-        message: result[1],
-        token: req.headers.authorization
-      });
+    util.setSuccess(200, {
+      result,
+      token: req.headers.authorization
+    });
+    return util.send(res);
+  } catch (error) {
+    util.setError(400, error);
+    return util.send(res);
+  }
+};
+
+exports.editComment = async (req, res) => {
+  const userId = await getUserId(req);
+  const commentDetails = {
+    commentId: req.params.commentId,
+    userId,
+    comment: req.body.comment
+  };
+  try {
+    const result = await CommentService.editComment(commentDetails);
+    if (!result) {
+      util.setError(404, 'Sorry, comment was not found');
       return util.send(res);
     }
-    util.setSuccess(201, {
-      message: 'Comment successfully flagged as inappropriate',
-      flagId: result[1].flagId,
-      userId: result[1].userId,
-      typeId: result[1].typeId,
-      type: result[1].type,
-      createdOn: result[1].createdOn,
+    util.setSuccess(200, {
+      result,
+      token: req.headers.authorization
+    });
+    return util.send(res);
+  } catch (error) {
+    util.setError(400, error);
+    return util.send(res);
+  }
+};
+
+exports.deleteComment = async (req, res) => {
+  const userId = await getUserId(req);
+  const commentDetails = {
+    commentId: req.params.commentId,
+    userId
+  };
+  try {
+    const result = await CommentService.deleteComment(commentDetails);
+    if (!result) {
+      util.setError(404, 'Sorry, comment was not found');
+      return util.send(res);
+    }
+    util.setSuccess(200, {
+      result,
       token: req.headers.authorization
     });
     return util.send(res);

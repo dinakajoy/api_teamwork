@@ -1,55 +1,61 @@
-/* eslint-disable no-useless-catch */
-const pool = require('../config/dbConfig');
+const query = require('../config/queryConfig');
+const articleService = require('../services/ArticleService');
 
 class CategoryService {
   static async createCategory(newCategory) {
+    const newCategoryQuery = 'INSERT INTO categories ("category") VALUES($1) RETURNING *';
+    const values = [newCategory];
     try {
-      const newCategoryQuery = 'INSERT INTO categories ("category") VALUES($1) RETURNING *';
-      const values = [`${newCategory.category}`];
-      const { rows } = await pool.query(newCategoryQuery, values);
-      return rows[0];
+      const result = await query.queryResult(newCategoryQuery, values);
+      return result;
     } catch (error) {
-      throw error;
+      return error;
     }
   }
 
   static async getCategories() {
+    const getCategoriesQuery = 'SELECT "categoryId", category FROM categories';
     try {
-      const getCategoriesQuery = 'SELECT "categoryId", category FROM categories';
-      const { rows } = await pool.query(getCategoriesQuery);
-      return rows;
+      const result = await query.queryResult(getCategoriesQuery);
+      return result;
     } catch (error) {
-      throw error;
+      return error;
     }
   }
 
-  static async getArticleCategory(categoryId) {
+  static async getCategory(categoryId) {
+    const getCategory = 'SELECT "categoryId", category FROM categories WHERE "categoryId" = $1';
+    const values = [categoryId];
     try {
-      const getCategoryQuery = 'SELECT "categoryId", category FROM categories WHERE "categoryId" = $1';
-      const getArticleQuery = `SELECT a."articleId", a.title, a."articleImage", a.article, a."createdOn", concat(u."firstName", ' ', u."lastName") AS author 
-      FROM articles a
-      INNER JOIN users u ON a."userId" = u."userId" 
-      WHERE a."categoryId" = $1`;
-      const values = [categoryId];
-      const { rows } = await pool.query(getCategoryQuery, values);
-      const res = await pool.query(getArticleQuery, values);
-      const category = rows[0];
-      const article = res.rows;
-      return [category, article];
+      const result = await query.queryResult(getCategory, values);
+      return result;
     } catch (error) {
-      throw error;
+      return error;
+    }
+  }
+
+  static async getArticlesCategory(categoryId) {
+    try {
+      const category = await CategoryService.getCategory(categoryId);
+      const articles = await articleService.getArticlesCategory(categoryId);
+      return [category[0], articles];
+    } catch (error) {
+      return error;
     }
   }
 
   static async editCategory(categoryDetails) {
-    try {
-      const editCategoryQuery = 'UPDATE categories SET "category" = ($1) WHERE "categoryId" = ($2)';
-      const values = [`${categoryDetails.category}`, `${categoryDetails.categoryId}`];
-      const result = await pool.query(editCategoryQuery, values);
-      return result;
-    } catch (error) {
-      throw error;
+    const getCategory = await query.queryResult('SELECT "categoryId", "category" FROM categories WHERE "categoryId" = $1', [categoryDetails.categoryId]);
+    if (getCategory.length < 1) {
+      return !getCategory;
     }
+    const editCategoryQuery = 'UPDATE categories SET "category" = ($1) WHERE "categoryId" = ($2)';
+    const values = [`${categoryDetails.category}`, `${categoryDetails.categoryId}`];
+    const result = await query.updateQueryResult(editCategoryQuery, values);
+    if (result === 'Successful') {
+      return getCategory;
+    }
+    return !result;
   }
 }
 

@@ -1,43 +1,28 @@
-const { createUsersTable } = require('./user');
-const { dropUsersTable } = require('./user');
-const { createArticlesTable } = require('./article');
-const { dropArticlesTable } = require('./article');
-const { createGifsTable } = require('./gif');
-const { dropGifsTable } = require('./gif');
-const { createCategoriesTable } = require('./category');
-const { dropCategoriesTable } = require('./category');
-const { createFlagsTable } = require('./flag');
-const { dropFlagsTable } = require('./flag');
-const { createCommentsTable } = require('./comment');
-const { dropCommentsTable } = require('./comment');
+const createTables = require('./createTables');
+const { dropTables } = require('./dropTablesQuery');
 
-const createTables = () => {
-  createUsersTable();
-  createCategoriesTable();
-  createArticlesTable();
-  createGifsTable();
-  createCommentsTable();
-  createFlagsTable();
+const createAllTables = async () => {
+  await createTables.usersTable();
+  await createTables.categoriesTable();
+  await createTables.articlesTable();
+  await createTables.gifsTable();
+  await createTables.flagsTable();
+  await createTables.commentsTable();
 };
 
-const dropTables = () => {
-  dropFlagsTable();
-  dropCommentsTable();
-  dropGifsTable();
-  dropArticlesTable();
-  dropCategoriesTable();
-  dropUsersTable();
+const dropAllTables = () => {
+  dropTables();
 };
 
 module.exports = {
-  createTables,
-  dropTables
+  createAllTables,
+  dropAllTables
 };
 
 require('make-runnable');
 
 // To execute
 /*
-  node api/v1/models/index createTables
-  node api/v1/models/index dropTables
+  node api/v1/models/index createAllTables
+  node api/v1/models/index dropAllTables
 */

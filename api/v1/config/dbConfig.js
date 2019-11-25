@@ -1,8 +1,5 @@
 require('dotenv').config();
-
 const { Pool } = require('pg');
-
-console.log(`This is a ${process.env.NODE_ENV} environment`);
 
 let pool;
 const connectionString = `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_DATABASE}`;
@@ -28,8 +25,9 @@ if (!pool) {
   process.exit(1);
 } else {
   pool.on('connect', () => {
-    console.log('connected to the Database Successfully');
+    console.log('Database Connected Successfully');
   });
+  console.log(`Running on ${process.env.NODE_ENV} environment`);
 }
 
 module.exports = pool;

@@ -1,110 +1,95 @@
-/* eslint-disable no-useless-catch */
-const pool = require('../config/dbConfig');
+const query = require('../config/queryConfig');
+const articleService = require('../services/ArticleService');
+const gifService = require('../services/GifService');
+const commentService = require('../services/CommentService');
+const flagService = require('../services/FlagService');
 
 class UserService {
-  static async addUser(newUser) {
+  static async createUser(newUser) {
+    const newUserQuery = 'INSERT INTO users ("isAdmin", "firstName", "lastName", "email", "password", "gender", "jobRole", "department", "address") VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *';
+    const values = [`${newUser.isAdmin}`, `${newUser.firstName}`, `${newUser.lastName}`, `${newUser.email}`, `${newUser.password}`, `${newUser.gender}`, `${newUser.jobRole}`, `${newUser.department}`, `${newUser.address}`];
     try {
-      const newUserQuery = 'INSERT INTO users ("isAdmin", "firstName", "lastName", "email", "password", "gender", "jobRole", "department", "address") VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *';
-      const values = [`${newUser.isAdmin}`, `${newUser.firstName}`, `${newUser.lastName}`, `${newUser.email}`, `${newUser.password}`, `${newUser.gender}`, `${newUser.jobRole}`, `${newUser.department}`, `${newUser.address}`];
-      const { rows } = await pool.query(newUserQuery, values);
-      return rows[0];
+      const result = await query.queryResult(newUserQuery, values);
+      return result;
     } catch (error) {
-      throw error;
+      return error;
     }
   }
 
-  static async getUser(getUser) {
+  static async checkUser(getUser) {
+    const getUserQuery = 'SELECT "userId", "isAdmin", "firstName", "lastName", "email", "password", "gender", "jobRole", "department", "address" FROM users WHERE "userId" = $1';
+    const values = [getUser];
     try {
-      const getUserQuery = 'SELECT "userId", "isAdmin", "firstName", "lastName", "email", "password", "picture", "gender", "jobRole", "department", "address" FROM users WHERE email = $1';
-      const values = [getUser];
-      const { rows } = await pool.query(getUserQuery, values);
-      return rows[0];
+      const result = await query.queryResult(getUserQuery, values);
+      return result;
     } catch (error) {
-      throw error;
+      return error;
+    }
+  }
+
+  static async getUser(userEmail) {
+    const getUserQuery = 'SELECT "userId", "isAdmin", "firstName", "lastName", "email", "password", "picture", "gender", "jobRole", "department", "address" FROM users WHERE email = $1';
+    const values = [userEmail];
+    try {
+      const result = query.queryResult(getUserQuery, values);
+      return result;
+    } catch (error) {
+      return error;
     }
   }
 
   static async getUsers() {
+    const usersQuery = 'SELECT  "userId", "isAdmin", "firstName", "lastName", "email", "gender", "jobRole", "department", "address" FROM users';
     try {
-      const { rows } = await pool.query('SELECT  "userId", "isAdmin", "firstName", "lastName", "email", "gender", "jobRole", "department", "address" FROM users');
-      return rows;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  static async getAdmin(getUser) {
-    try {
-      const getUserQuery = 'SELECT "userId", "isAdmin", "firstName", "lastName", "email", "password", "gender", "jobRole", "department", "address" FROM users WHERE "userId" = $1';
-      const values = [`${getUser}`];
-      const result = await pool.query(getUserQuery, values);
+      const result = query.queryResult(usersQuery);
       return result;
     } catch (error) {
-      throw error;
+      return error;
     }
   }
 
-  static async changePhoto(user) {
-    try {
-      const { rows } = await pool.query('SELECT "userId", "isAdmin", "firstName", "lastName", "email", "password", "gender", "jobRole", "department", "address" from users WHERE "userId" = $1', [user.userId]);
-      if (rows === undefined || !rows[0]) {
-        return 'Sorry, User was not found';
-      }
-      if (rows[0].userId !== user.userId) {
-        return 'Unauthorized user';
-      }
-      const userQuery = 'UPDATE users SET "picture" = ($1) WHERE "userId" = ($2)';
-      const values = [`${user.picture}`, `${user.userId}`];
-      await pool.query(userQuery, values);
-      return 'Photo successfully changed';
-    } catch (error) {
-      throw error;
+  static async updateUser(user) {
+    const getUser = await UserService.checkUser(user[2]);
+    if (getUser.length < 1) {
+      return !getUser;
     }
-  }
-
-  static async changePassword(user) {
-    try {
-      const { rows } = await pool.query('SELECT "userId", "isAdmin", "firstName", "lastName", "email", "password", "gender", "jobRole", "department", "address" from users WHERE "userId" = $1', [user.userId]);
-      if (rows === undefined || !rows[0]) {
-        return 'Sorry, User was not found';
-      }
-      if (rows[0].userId !== user.userId) {
-        return 'Unauthorized user';
-      }
-      const userQuery = 'UPDATE users SET "password" = ($2) WHERE "userId" = ($1)';
-      const values = [`${user.userId}`, `${user.password}`];
-      await pool.query(userQuery, values);
-      return 'Password successfully changed';
-    } catch (error) {
-      throw error;
+    const userQuery = `UPDATE users SET ${user[0]} = ($1) WHERE "userId" = ($2)`;
+    const values = [user[1], user[2]];
+    const result = await query.updateQueryResult(userQuery, values);
+    if (result === 'Successful') {
+      return getUser;
     }
+    return !result;
   }
 
   static async editUser(user) {
-    try {
-      const userQuery = 'UPDATE users SET "isAdmin" = ($1), "firstName" = ($2), "lastName" = ($3), "email" = ($4), "gender" = ($5), "jobRole" = ($6), "department" = ($7), "address" = ($8) WHERE "userId" = ($9)';
-      const values = [`${user.isAdmin}`, `${user.firstName}`, `${user.lastName}`, `${user.email}`, `${user.gender}`, `${user.jobRole}`, `${user.department}`, `${user.address}`, `${user.userId}`];
-      await pool.query(userQuery, values);
-      return 'Successfully updated account';
-    } catch (error) {
-      throw error;
+    const getUser = await UserService.checkUser(user.userId);
+    if (getUser.length < 1) {
+      return !user;
     }
+    const userQuery = 'UPDATE users SET "isAdmin" = ($1), "firstName" = ($2), "lastName" = ($3), "email" = ($4), "gender" = ($5), "jobRole" = ($6), "department" = ($7), "address" = ($8) WHERE "userId" = ($9)';
+    const values = [`${user.isAdmin}`, `${user.firstName}`, `${user.lastName}`, `${user.email}`, `${user.gender}`, `${user.jobRole}`, `${user.department}`, `${user.address}`, user.userId];
+    const result = await query.updateQueryResult(userQuery, values);
+    if (result === 'Successful') {
+      return getUser;
+    }
+    return !result;
   }
 
   static async deleteUser(user) {
-    try {
-      const deleteUsersArticles = await pool.query('DELETE FROM articles WHERE "userId" = ($1)', [user]);
-      const deleteUsersGifs = await pool.query('DELETE FROM gifs WHERE "userId" = ($1)', [user]);
-      const deleteUsersComments = await pool.query('DELETE FROM comments WHERE "userId" = ($1)', [user]);
-      const deleteUsersFlags = await pool.query('DELETE FROM flags WHERE "userId" = ($1)', [user]);
-      if ((!deleteUsersArticles || !deleteUsersGifs) || (!deleteUsersComments || !deleteUsersFlags)) {
-        return 'Sorry, could not delete user';
-      }
-      await pool.query('DELETE FROM users WHERE "userId" = ($1)', [user]);
-      return 'Successfully deleted account';
-    } catch (error) {
-      throw error;
+    const getUser = await UserService.checkUser(user);
+    if (getUser.rows.length < 1) {
+      return !user;
     }
+    await articleService.deleteUserArticle(user);
+    await gifService.deleteUserGif(user);
+    await commentService.deleteUserComments(user);
+    await flagService.deleteUserFlags(user);
+    const result = await query.updateQueryResult('DELETE FROM users WHERE "userId" = ($1)', [user]);
+    if (result === 'Successful') {
+      return getUser.rows[0];
+    }
+    return !result;
   }
 }
 

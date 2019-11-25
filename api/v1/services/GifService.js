@@ -1,96 +1,87 @@
 /* eslint-disable no-useless-catch */
-const pool = require('../config/dbConfig');
+const query = require('../config/queryConfig');
+const commentService = require('../services/CommentService');
+const flagService = require('../services/FlagService');
 
 class GifService {
-  static async addGif(newGif) {
-    try {
-      const newGifQuery = 'INSERT INTO gifs ("title", "imageUrl", "public_id", "userId") VALUES($1, $2, $3, $4) RETURNING *';
-      const values = [`${newGif.title}`, `${newGif.imageUrl}`, `${newGif.public_id}`, `${newGif.userId}`];
-      const { rows } = await pool.query(newGifQuery, values);
-      return rows[0];
-    } catch (error) {
-      throw error;
-    }
+  static async createGif(newGif) {
+    const newGifQuery = 'INSERT INTO gifs ("title", "imageUrl", "public_id", "userId") VALUES($1, $2, $3, $4) RETURNING *';
+    const values = [`${newGif.title}`, `${newGif.imageUrl}`, `${newGif.public_id}`, `${newGif.userId}`];
+    const rows = await query.queryResult(newGifQuery, values);
+    return rows;
   }
 
   static async getGif(gifId) {
-    try {
-      const getGifQuery = `SELECT 
+    const getGifQuery = `SELECT 
               g."gifId", g.title, g."imageUrl", g.public_id, g."createdOn", concat("firstName", ' ', "lastName") AS author
               FROM gifs g 
               INNER JOIN users u ON g."userId" = u."userId"  
               WHERE "gifId" = $1`;
-      const getGifComment = `SELECT 
-              c."commentId", c.comment, concat("firstName", ' ', "lastName") AS author 
-              FROM comments c
-              INNER JOIN users u ON c."userId" = u."userId"
-              WHERE type = 'gif' AND "typeId" = $1
-              ORDER BY c."createdOn" DESC`;
-      const values = [gifId];
-      const { rows } = await pool.query(getGifQuery, values);
-      const res = await pool.query(getGifComment, values);
-      const gif = rows[0];
-      const comment = res.rows;
-      return [gif, comment];
-    } catch (error) {
-      throw error;
-    }
+    const values = [gifId];
+    const queryDetails = { type: 'gif', typeId: gifId };
+    const comment = await commentService.getComments(queryDetails);
+    const flag = await flagService.getFlaggedItem(queryDetails);
+    const gif = await query.queryResult(getGifQuery, values);
+    return [gif[0], comment, flag];
   }
 
   static async deleteGif(gifToDelete) {
     try {
       let deleted = [];
-      const { rows } = await pool.query('SELECT * from gifs WHERE "gifId" = $1', [gifToDelete.gifId]);
-      if (!rows || rows.length === 0) {
-        return rows;
+      const rows = await query.queryDetails('SELECT * from gifs WHERE "gifId" = $1', [gifToDelete.gifId]);
+      if (!rows || rows.length < 1) {
+        return !rows;
       }
       deleted = rows[0];
-      if (rows[0].userId === gifToDelete.userId) {
-        const newGifQuery = 'DELETE FROM gifs WHERE "gifId" = ($1)';
-        const values = [`${gifToDelete.gifId}`];
-        await pool.query(newGifQuery, values);
-        return deleted;
+      const deleteDetails = { type: 'gif', typeId: gifToDelete.gifId };
+      await commentService.deleteCommentByItem(deleteDetails);
+      await flagService.deleteFlagByItem(deleteDetails);
+      const newGifQuery = 'DELETE FROM gifs WHERE "gifId" = ($1)';
+      const values = [`${gifToDelete.gifId}`];
+      await query.updateQueryResult(newGifQuery, values);
+      return deleted;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Delete users gif when user is deleted
+  static async deleteUserGif(userId) {
+    try {
+      let deleted = [];
+      const rows = await query.queryDetails('SELECT * from gifs WHERE "userId" = $1', [userId]);
+      if (!rows || rows.length < 1) {
+        return !rows;
       }
-      return rows[0];
+      deleted = rows[0];
+      const deleteDetails = { type: 'gif', typeId: rows[0].gifId };
+      await commentService.deleteCommentByItem(deleteDetails);
+      await flagService.deleteFlagByItem(deleteDetails);
+      const newGifQuery = 'DELETE FROM gifs WHERE "userId" = $1';
+      const values = [userId];
+      await query.updateQueryResult(newGifQuery, values);
+      return deleted;
     } catch (error) {
       throw error;
     }
   }
 
   static async commentGif(commentToAdd) {
-    try {
-      // let deleted = [];
-      const { rows } = await pool.query('SELECT * from gifs WHERE "gifId" = $1', [commentToAdd.gifId]);
-      if (!rows) {
-        return 'Sorry, gif not found';
-      }
-      // deleted = rows[0];
-      if (rows[0]) {
-        const newGifQuery = 'INSERT INTO comments ("comment", "type", "typeId", "userId") VALUES($1, $2, $3, $4) RETURNING *';
-        const values = [`${commentToAdd.comment}`, `${commentToAdd.type}`, `${commentToAdd.gifId}`, `${commentToAdd.userId}`];
-        await pool.query(newGifQuery, values);
-      }
-      return rows[0];
-    } catch (error) {
-      throw error;
+    const rows = await query.queryResult('SELECT * from gifs WHERE "gifId" = $1', [commentToAdd.gifId]);
+    if (!rows) {
+      return 'Sorry, gif not found';
     }
+    const result = commentService.createComment(commentToAdd);
+    return result;
   }
 
   static async flagGif(flagToAdd) {
-    try {
-      const res = await pool.query('SELECT "userId", type, "typeId" FROM flags WHERE ("userId" = $1 AND "typeId" = $2) AND type = $3', [flagToAdd.userId, flagToAdd.typeId, flagToAdd.type]);
-      const result = res.rows[0];
-      if (result && result.type === 'gif') {
-        await pool.query('DELETE FROM flags WHERE ("userId" = $1 AND "typeId" = $2) AND type = $3', [flagToAdd.userId, flagToAdd.typeId, flagToAdd.type]);
-        return ['true', 'Successfully unflagged article as inappropriate'];
-      }
-      const flagQuery = 'INSERT INTO flags ("userId", "type", "typeId") VALUES($1, $2, $3) RETURNING *';
-      const values = [`${flagToAdd.userId}`, `${flagToAdd.type}`, `${flagToAdd.typeId}`];
-      const { rows } = await pool.query(flagQuery, values);
-      return ['false', rows[0]];
-    } catch (error) {
-      throw error;
+    const rows = await query.queryResult('SELECT * from gifs WHERE "gifId" = $1', [flagToAdd.typeId]);
+    if (!rows) {
+      return 'Sorry, article not found';
     }
+    const result = await flagService.createFlag(flagToAdd);
+    return result.message;
   }
 }
 

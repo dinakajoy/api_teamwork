@@ -20,9 +20,9 @@ app.use(fileupload({
 }));
 
 const userRoutes = require('./v1/routes/userRoutes');
-const gifRoutes = require('./v1/routes/gifRoutes');
 const categoryRoutes = require('./v1/routes/categoryRoutes');
 const articleRoutes = require('./v1/routes/articleRoutes');
+const gifRoutes = require('./v1/routes/gifRoutes');
 const feedRoute = require('./v1/routes/feedRoute');
 const commentRoute = require('./v1/routes/commentRoute');
 const flagRoute = require('./v1/routes/flagRoute');
@@ -40,9 +40,9 @@ app.get('/', (req, res) => {
 
 /* * Application Routes For All Resources * */
 app.use('/api/v1/auth', userRoutes);
-app.use('/api/v1/gifs', gifRoutes);
 app.use('/api/v1/categories', categoryRoutes);
 app.use('/api/v1/articles', articleRoutes);
+app.use('/api/v1/gifs', gifRoutes);
 app.use('/api/v1/feed', feedRoute);
 app.use('/api/v1/comments', commentRoute);
 app.use('/api/v1/flags', flagRoute);
