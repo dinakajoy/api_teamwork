@@ -75,18 +75,18 @@ describe('a PATCH request to "/categories/:categoryId"', () => {
   });
 });
 
-// describe('a GET request to "/categories/:categoriesId/articles"', () => {
-//   it('should display all articles related a specific category', (done) => {
-//     chai.request(app)
-//       .get('/api/v1/categories/1/articles')
-//       .send()
-//       .then((res) => {
-//         expect(res.status).to.equal(200);
-//         done();
-//       })
-//       .catch((err) => {
-//         console.log(err.message);
-//         done();
-//       });
-//   });
-// });
+describe('a GET request to "/categories/:categoriesId/articles"', () => {
+  it('should display all articles related a specific category', (done) => {
+    chai.request(app)
+      .get('/api/v1/categories/1/articles')
+      .send()
+      .then((res) => {
+        expect(res.status).to.equal(200);
+        done();
+      })
+      .catch((err) => {
+        console.log(err.message);
+        done();
+      });
+  });
+});

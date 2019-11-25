@@ -74,7 +74,7 @@ class CommentService {
     const values = [commentDetails.type, commentDetails.typeId];
     const result = await query.queryResult(commentQuery, values);
     const flag = await flagService.getFlaggedItem(commentDetails);
-    return [...result, ...flag];
+    return [result, { flag }];
     // return [result];
   }
 }

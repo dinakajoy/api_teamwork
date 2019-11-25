@@ -49,7 +49,7 @@ describe('a POST request to "/gifs/:gifId/comment"', () => {
       .set({ Authorization: process.env.TOKEN })
       .send(comment)
       .then((res) => {
-        expect(res.status).to.equal(201);
+        expect(res.status).to.equal(200);
         expect(res.body.data).to.include({
           message: 'Comment successfully created'
         });
@@ -69,7 +69,7 @@ describe('a POST request to "/gifs/:gifId/flag"', () => {
       .set({ Authorization: process.env.TOKEN })
       .send()
       .then((res) => {
-        expect(res).to.have.status(201);
+        expect(res).to.have.status(200);
         done();
       })
       .catch((err) => {

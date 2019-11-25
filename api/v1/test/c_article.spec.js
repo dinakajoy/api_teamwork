@@ -126,7 +126,7 @@ describe('a POST request to "/articles/:articleId/comment"', () => {
       .set({ Authorization: process.env.TOKEN })
       .send(comment)
       .then((res) => {
-        expect(res).to.have.status(201);
+        expect(res).to.have.status(200);
         expect(res.body.data).to.include({
           message: 'Comment successfully created'
         });
