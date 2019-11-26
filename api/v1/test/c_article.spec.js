@@ -19,6 +19,9 @@ describe('a POST request to "/articles"', () => {
       .attach('articleImage', fs.readFileSync('./api/v1/test/images/eight.jpg'), 'eight.jpg')
       .then((res) => {
         expect(res).to.have.status(201);
+        expect(res.body.data).to.include({
+          message: 'Article successfully posted'
+        });
         done();
       })
       .catch((err) => {
@@ -28,7 +31,7 @@ describe('a POST request to "/articles"', () => {
   });
   it('should check if user is authenticated before adding article without image', (done) => {
     const articleDetails = {
-      categoryId: 1,
+      categoryId: 2,
       title: 'title title',
       article: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestiae, esse voluptatem unde vitae iste nisi, dolore ipsam sit ut non'
     };
@@ -51,7 +54,59 @@ describe('a POST request to "/articles"', () => {
   });
 });
 
+describe('a GET request to "/categories/:categoriesId/articles"', () => {
+  it('should display error if wrong categoryId', (done) => {
+    chai.request(app)
+      .get('/api/v1/categories/10/articles')
+      .set({ Authorization: process.env.TOKEN })
+      .send()
+      .then((res) => {
+        expect(res).to.have.status(404);
+        expect(res.body.error).to.equal('Not Found');
+        done();
+      })
+      .catch((err) => {
+        console.log(err.message);
+        done();
+      });
+  });
+  it('should display all articles related a specific category', (done) => {
+    chai.request(app)
+      .get('/api/v1/categories/1/articles')
+      .set({ Authorization: process.env.TOKEN })
+      .send()
+      .then((res) => {
+        expect(res.status).to.equal(200);
+        expect(res.body.data).to.be.a('object');
+        done();
+      })
+      .catch((err) => {
+        console.log(err.message);
+        done();
+      });
+  });
+});
+
 describe('a PATCH request to "/articles/:articleId"', () => {
+  it('should throw error if wrong articleId', (done) => {
+    chai.request(app)
+      .patch('/api/v1/articles/19')
+      .set('Content-Type', 'application/x-www-form-urlencoded')
+      .set({ Authorization: process.env.TOKEN })
+      .field('categoryId', 1)
+      .field('title', 'A title edited')
+      .field('article', 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestiae, esse voluptatem unde vitae iste nisi, dolore ipsam sit ut non')
+      .attach('articleImage', fs.readFileSync('./api/v1/test/images/eight.jpg'), 'eight.jpg')
+      .then((res) => {
+        expect(res).to.have.status(404);
+        expect(res.body.error).to.equal('Article not found');
+        done();
+      })
+      .catch((err) => {
+        console.log(err.message);
+        done();
+      });
+  });
   it('should check if user is authenticated and author before editing article with image', (done) => {
     chai.request(app)
       .patch('/api/v1/articles/1')
@@ -100,9 +155,23 @@ describe('a PATCH request to "/articles/:articleId"', () => {
 });
 
 describe('a GET request to "/articles/:articleId"', () => {
+  it('should display error if wrong categoryId', (done) => {
+    chai.request(app)
+      .get('/api/v1/articles/20')
+      .set({ Authorization: process.env.TOKEN })
+      .then((res) => {
+        expect(res).to.have.status(404);
+        expect(res.body.error).to.equal('Article not found');
+        done();
+      })
+      .catch((error) => {
+        console.log(error.message);
+        done();
+      });
+  });
   it('should check if user is authenticated before returning article details', (done) => {
     chai.request(app)
-      .get('/api/v1/articles/2')
+      .get('/api/v1/articles/1')
       .set({ Authorization: process.env.TOKEN })
       .then((res) => {
         expect(res).to.have.status(200);
@@ -126,7 +195,7 @@ describe('a POST request to "/articles/:articleId/comment"', () => {
       .set({ Authorization: process.env.TOKEN })
       .send(comment)
       .then((res) => {
-        expect(res).to.have.status(200);
+        expect(res).to.have.status(201);
         expect(res.body.data).to.include({
           message: 'Comment successfully created'
         });
@@ -147,6 +216,9 @@ describe('a POST request to "/articles/:articleId/flag"', () => {
       .send()
       .then((res) => {
         expect(res).to.have.status(200);
+        expect(res.body.data).to.include({
+          result: 'Successfully flagged item'
+        });
         done();
       })
       .catch((err) => {
@@ -157,6 +229,23 @@ describe('a POST request to "/articles/:articleId/flag"', () => {
 });
 
 describe('a DELETE request to "/articles/:articleId"', () => {
+  it('should display error if wrong articleId', (done) => {
+    chai.request(app)
+      .delete('/api/v1/articles/20')
+      .set({ Authorization: process.env.TOKEN })
+      .send()
+      .then((res) => {
+        expect(res).to.have.status(404);
+        expect(res.body).to.include({
+          error: 'Article not found'
+        });
+        done();
+      })
+      .catch((error) => {
+        console.log(error.message);
+        done();
+      });
+  });
   it('should check if user is authenticated before deleting article details', (done) => {
     chai.request(app)
       .delete('/api/v1/articles/2')
@@ -164,6 +253,9 @@ describe('a DELETE request to "/articles/:articleId"', () => {
       .send()
       .then((res) => {
         expect(res).to.have.status(200);
+        expect(res.body.data).to.include({
+          message: 'Article successfully deleted'
+        });
         done();
       })
       .catch((error) => {

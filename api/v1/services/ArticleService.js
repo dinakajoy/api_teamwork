@@ -54,9 +54,9 @@ class ArticleService {
       return !getArticle;
     }
     try {
-      await commentService.getComments('article', articleId);
-      await flagService.getFlags('article', articleId);
-      return getArticle;
+      const comments = await commentService.getComments('article', articleId);
+      const flags = await flagService.getFlaggedItem('article', articleId);
+      return [getArticle, comments, flags];
     } catch (error) {
       return error;
     }

@@ -48,25 +48,25 @@ exports.getArticleCategory = async (req, res) => {
   const categoryId = +req.params.categoryId;
   try {
     const result = await CategoryService.getArticlesCategory(categoryId);
-    if (result) {
-      if (result[1].length < 1) {
-        util.setSuccess(200, {
-          categoryId: result[0].categoryId,
-          category: result[0].category,
-          article: 'No article added for this category',
-          token: req.headers.authorization
-        });
-        return util.send(res);
-      }
+    if (!result) {
+      util.setError(404, 'Not Found');
+      return util.send(res);
+    }
+    if (result[1].length < 1) {
       util.setSuccess(200, {
         categoryId: result[0].categoryId,
         category: result[0].category,
-        article: result[1],
+        article: 'No article added for this category',
         token: req.headers.authorization
       });
       return util.send(res);
     }
-    util.setError(404, 'Not Found');
+    util.setSuccess(200, {
+      categoryId: result[0].categoryId,
+      category: result[0].category,
+      article: result[1],
+      token: req.headers.authorization
+    });
     return util.send(res);
   } catch (error) {
     util.setError(400, error);

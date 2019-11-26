@@ -63,24 +63,15 @@ exports.getArticle = async (req, res) => {
   const article = req.params.articleId;
   try {
     const result = await ArticleService.getArticle(article);
-    console.log(result);
     if (!result) {
-      util.setError(400, 'Sorry, there was an error');
+      util.setError(404, 'Article not found');
       return util.send(res);
     }
-    if (result[1].length === 0) {
-      util.setSuccess(200, {
-        articleId: result[0].articleId,
-        title: result[0].title,
-        articleImage: result[0].articleImage,
-        article: result[0].article,
-        category: result[0].category,
-        author: result[0].author,
-        createdOn: result[0].createdOn,
-        comments: 'No comment added for this article',
-        token: req.headers.authorization
-      });
-      return util.send(res);
+    if (!result[1]) {
+      result[1] = 'No comment added for this article';
+    }
+    if (!result[2]) {
+      result[2] = 'No flag added for this article';
     }
     util.setSuccess(200, {
       articleId: result[0].articleId,
@@ -91,6 +82,7 @@ exports.getArticle = async (req, res) => {
       author: result[0].author,
       createdOn: result[0].createdOn,
       comments: result[1],
+      flags: result[2],
       token: req.headers.authorization
     });
     return util.send(res);
@@ -114,7 +106,8 @@ exports.editArticle = async (req, res) => {
       return util.send(res);
     }
     newArticle = {
-      categoryId: req.body.categoryId,
+      articleId: +req.params.articleId,
+      categoryId: +req.body.categoryId,
       title: req.body.title,
       article: req.body.article,
       articleImage: `${url}${img}`,
@@ -133,11 +126,11 @@ exports.editArticle = async (req, res) => {
   }
   try {
     if (!result) {
-      util.setError(500, 'Sorry, there was an error');
+      util.setError(404, 'Article not found');
       return util.send(res);
     }
-    util.setSuccess(201, {
-      message: 'Article successfully posted',
+    util.setSuccess(200, {
+      message: 'Article successfully updated',
       articleId: newArticle.articleId,
       title: newArticle.title,
       token: req.headers.authorization,
@@ -159,7 +152,7 @@ exports.deleteArticle = async (req, res) => {
   try {
     const result = await ArticleService.deleteArticle(articleDetails);
     if (!result) {
-      util.setError(400, 'Sorry, there was an error');
+      util.setError(404, 'Article not found');
       return util.send(res);
     }
     const filePath = `${result.articleImage}`;
@@ -196,7 +189,7 @@ exports.commentArticle = async (req, res) => {
   try {
     const rows = await ArticleService.commentArticle(commentToAdd);
     if (!rows) {
-      util.setError(500, 'Sorry, there was an error');
+      util.setError(500, 'Article not found');
       return util.send(res);
     }
     const result = rows[0];

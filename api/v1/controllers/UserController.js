@@ -226,8 +226,10 @@ exports.deleteUser = async (req, res) => {
       util.setError(404, 'User with id not found');
       return util.send(res);
     }
-    const user = result[0];
-    util.setSuccess(200, user);
+    util.setSuccess(200, {
+      message: 'User account was successfully deleted',
+      token: req.headers.authorization
+    });
     return util.send(res);
   } catch (error) {
     util.setError(500, error.message);

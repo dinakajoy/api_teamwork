@@ -299,7 +299,7 @@ describe('a DELETE request to "/auth/users/:userId"', () => {
       .set({ Authorization: process.env.TOKEN })
       .send()
       .end((err, res) => {
-        expect(res).to.have.status(500);
+        expect(res).to.have.status(404);
         expect(res.body.error).to.equal('User with id not found');
         done();
       });
@@ -311,6 +311,7 @@ describe('a DELETE request to "/auth/users/:userId"', () => {
       .send()
       .then((res) => {
         expect(res).to.have.status(200);
+        expect(res.body.data.message).to.equal('User account was successfully deleted');
         done();
       })
       .catch((err) => {

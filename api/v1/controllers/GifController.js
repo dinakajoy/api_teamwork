@@ -47,9 +47,15 @@ exports.getGif = async (req, res) => {
   const gifId = +req.params.gifId;
   try {
     const resp = await GifService.getGif(gifId);
-    if (!res) {
-      util.setError(400, 'Sorry, there was an error');
+    if (!resp) {
+      util.setError(404, 'Gif not found');
       return util.send(res);
+    }
+    if (!resp[1]) {
+      resp[1] = 'No comment added for this article';
+    }
+    if (!resp[2]) {
+      resp[2] = 'No flag added for this article';
     }
     const result = resp[0];
     util.setSuccess(200, {
@@ -71,20 +77,15 @@ exports.getGif = async (req, res) => {
 };
 
 exports.deleteGif = async (req, res) => {
-  const gif = +req.params.gifId;
   const user = await getUserId(req);
   const gifToDelete = {
-    gifId: gif,
+    gifId: +req.params.gifId,
     userId: user
   };
   try {
     const result = await GifService.deleteGif(gifToDelete);
     if (!result) {
-      util.setError(400, 'Sorry, there was an error');
-      return util.send(res);
-    }
-    if (result.length === 0) {
-      util.setError(404, 'Sorry, Gif not found');
+      util.setError(404, 'Gif not found');
       return util.send(res);
     }
     const deleteOnCloudinary = await Helpers.deleteFromCloudinary(result.public_id);
@@ -94,13 +95,7 @@ exports.deleteGif = async (req, res) => {
     }
     util.setSuccess(200, {
       message: 'gif post successfully deleted',
-      gifId: result.gifId,
-      title: result.title,
-      imageUrl: result.imageUrl,
-      public_id: result.public_id,
-      createdOn: result.createdOn,
-      token: req.headers.authorization,
-      userId: result.userId
+      token: req.headers.authorization
     });
     return util.send(res);
   } catch (error) {
@@ -121,7 +116,7 @@ exports.commentGif = async (req, res) => {
   try {
     const rows = await GifService.commentGif(commentToAdd);
     if (!rows) {
-      util.setError(500, 'Sorry, there was an error');
+      util.setError(404, 'Gif not found');
       return util.send(res);
     }
     const result = rows[0];

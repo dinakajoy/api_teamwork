@@ -2,20 +2,18 @@ const chai = require('chai');
 const chaiHttp = require('chai-http');
 
 const expect = chai.expect;
-const should = chai.should();
 
 chai.use(chaiHttp);
 const app = require('../../app.js');
 
 describe('a GET request to "/flags"', () => {
-  it('should check if user is authenticated before adding gif', (done) => {
+  it('should check if user is an admin before displaying flagged items', (done) => {
     chai.request(app)
       .get('/api/v1/flags')
       .set({ Authorization: process.env.TOKEN })
       .send()
       .then((res) => {
         expect(res.status).to.equal(200);
-        should.exist(res.body.data);
         res.body.data.should.be.a('array');
         done();
       })
@@ -26,14 +24,17 @@ describe('a GET request to "/flags"', () => {
   });
 });
 
-describe('a GET request to "/flags/:flagId"', () => {
+describe('a DELETE request to "/:typeId/:type"', () => {
   it('should return 404 because flag does not exist', (done) => {
     chai.request(app)
-      .get('/api/v1/flags/1')
+      .delete('/api/v1/flags/10/gif')
       .set({ Authorization: process.env.TOKEN })
       .send()
       .then((res) => {
         expect(res.status).to.equal(404);
+        expect(res.body).to.include({
+          error: 'Flag not found'
+        });
         done();
       })
       .catch((err) => {
@@ -41,16 +42,16 @@ describe('a GET request to "/flags/:flagId"', () => {
         done();
       });
   });
-});
-
-describe('a DELETE request to "/flags/:flagId"', () => {
-  it('should return 404 because no flag exist', (done) => {
+  it('should delete flagged item if admin', (done) => {
     chai.request(app)
-      .delete('/api/v1/flags/1')
+      .delete('/api/v1/flags/1/comment')
       .set({ Authorization: process.env.TOKEN })
       .send()
       .then((res) => {
-        expect(res.status).to.equal(404);
+        expect(res.status).to.equal(200);
+        expect(res.body.data).to.include({
+          message: 'Successfully deleted flagged item'
+        });
         done();
       })
       .catch((err) => {

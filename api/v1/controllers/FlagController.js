@@ -20,16 +20,18 @@ exports.getFlags = async (req, res) => {
 
 exports.deleteFlagged = async (req, res) => {
   const flagToDelete = {
-    typeId: req.params.typeId,
+    typeId: +req.params.typeId,
     type: req.params.type
   };
   try {
-    const result = await FlagService.deleteFlag(flagToDelete);
+    const result = await FlagService.deleteFlagByItem(flagToDelete);
     if (!result) {
-      util.setError(400, 'Sorry, there was an error');
+      util.setError(404, 'Flag not found');
       return util.send(res);
     }
-    util.setSuccess(200, result);
+    util.setSuccess(200, {
+      message: 'Successfully deleted flagged item'
+    });
     return util.send(res);
   } catch (error) {
     util.setError(500, error);

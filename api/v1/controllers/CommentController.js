@@ -15,7 +15,7 @@ exports.flagComment = async (req, res) => {
   try {
     const result = await CommentService.flagComment(flagToAdd);
     if (!result) {
-      util.setError(400, 'Sorry, there was an error');
+      util.setError(404, 'Comment not found');
       return util.send(res);
     }
     util.setSuccess(200, {
@@ -43,7 +43,7 @@ exports.editComment = async (req, res) => {
       return util.send(res);
     }
     util.setSuccess(200, {
-      result,
+      message: 'Successfully updated comment',
       token: req.headers.authorization
     });
     return util.send(res);
@@ -66,7 +66,7 @@ exports.deleteComment = async (req, res) => {
       return util.send(res);
     }
     util.setSuccess(200, {
-      result,
+      message: 'Successfully deleted comment',
       token: req.headers.authorization
     });
     return util.send(res);

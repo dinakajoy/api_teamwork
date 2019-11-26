@@ -78,7 +78,7 @@ class UserService {
 
   static async deleteUser(user) {
     const getUser = await UserService.checkUser(user);
-    if (getUser.rows.length < 1) {
+    if (getUser.length < 1) {
       return !user;
     }
     await articleService.deleteUserArticle(user);
@@ -87,7 +87,7 @@ class UserService {
     await flagService.deleteUserFlags(user);
     const result = await query.updateQueryResult('DELETE FROM users WHERE "userId" = ($1)', [user]);
     if (result === 'Successful') {
-      return getUser.rows[0];
+      return getUser[0];
     }
     return !result;
   }

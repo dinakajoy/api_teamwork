@@ -32,14 +32,16 @@ class Helpers {
 
   static async pushToCloudinary(file) {
     const result = await cloudinary.uploader.upload(file);
-    console.log(result);
     return result;
   }
 
   static async deleteFromCloudinary(publicId) {
-    const result = await cloudinary.uploader.destroy(publicId);
-    console.log(result);
-    return result;
+    try {
+      const result = await cloudinary.uploader.destroy(publicId);
+      return result;
+    } catch (error) {
+      return error;
+    }
   }
 
   static imageType(file, folder) {

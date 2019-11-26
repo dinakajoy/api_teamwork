@@ -17,8 +17,8 @@ class CommentService {
 
   static async flagComment(flagToAdd) {
     const rows = await query.queryResult('SELECT * from comments WHERE "commentId" = $1', [flagToAdd.typeId]);
-    if (!rows) {
-      return 'Sorry, comment not found';
+    if (rows.length < 1) {
+      return !rows;
     }
     const result = await flagService.createFlag(flagToAdd);
     return result.message;
@@ -27,21 +27,21 @@ class CommentService {
   // User can edit their comments
   static async editComment(commentDetails) {
     const rows = await query.queryResult('SELECT * from comments WHERE "commentId" = $1 AND "userId"=$2', [commentDetails.commentId, commentDetails.userId]);
-    if (!rows) {
+    if (rows.length < 1) {
       return !rows;
     }
     const result = await query.updateQueryResult('UPDATE comments SET comment=$1  WHERE "commentId" = $2 AND "userId"=$3', [commentDetails.comment, commentDetails.commentId, commentDetails.userId]);
-    return result.message;
+    return result;
   }
 
   // User can delete their comments
   static async deleteComment(commentDetails) {
     const rows = await query.queryResult('SELECT * FROM comments WHERE "commentId" = $1 AND "userId"=$2', [commentDetails.commentId, commentDetails.userId]);
-    if (!rows) {
+    if (rows.length < 1) {
       return !rows;
     }
     const result = await query.updateQueryResult('DELETE FROM comments WHERE "commentId" = $1 AND "userId"=$2', [commentDetails.commentId, commentDetails.userId]);
-    return result.message;
+    return result;
   }
 
   // Comments can be deleted when item is deleted (article, gif)
@@ -65,6 +65,7 @@ class CommentService {
   }
 
   static async getComments(commentDetails) {
+    let flag;
     const commentQuery = `SELECT 
             c."commentId", c.comment, concat("firstName", ' ', "lastName") AS "By" 
             FROM comments c
@@ -73,7 +74,13 @@ class CommentService {
             ORDER BY c."createdOn" DESC`;
     const values = [commentDetails.type, commentDetails.typeId];
     const result = await query.queryResult(commentQuery, values);
-    const flag = await flagService.getFlaggedItem(commentDetails);
+    flag = await flagService.getFlaggedItem(commentDetails);
+    if (!flag) {
+      flag = 'No flag for this comment';
+    }
+    if (result.length < 1 || !result) {
+      return !result;
+    }
     return [result, { flag }];
     // return [result];
   }

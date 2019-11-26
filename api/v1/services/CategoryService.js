@@ -35,6 +35,10 @@ class CategoryService {
   }
 
   static async getArticlesCategory(categoryId) {
+    const getCategory = await query.queryResult('SELECT "categoryId", "category" FROM categories WHERE "categoryId" = $1', [categoryId]);
+    if (getCategory.length < 1) {
+      return !getCategory;
+    }
     try {
       const category = await CategoryService.getCategory(categoryId);
       const articles = await articleService.getArticlesCategory(categoryId);

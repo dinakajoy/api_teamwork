@@ -16,7 +16,8 @@ Run npm run dev-server to start local server which will run on localhost:3000
 - POST `api/v1/auth/create-user` to create employees account
 - PATCH `api/v1/auth/users/:userId` to edit employees account
 - DELETE `api/v1/auth/users/:userId` to delete employees account
-- POST `api/v1/auth/categories` to create category to group articles
+- POST `api/v1/categories` to create category to group articles
+- PATCH `api/v1/categories/:categoryId` to edit category to group articles
 
 **User Authorization**
 - POST `api/v1/auth/signin` to login into account
@@ -24,9 +25,11 @@ Run npm run dev-server to start local server which will run on localhost:3000
 - PATCH `api/v1/auth/change-photo` to change account photo
 - GET `api/v1/auth/users` to get all users
 - GET `api/v1/auth/users/:userId` to get a specific user based on userId
-- GET `api/v1/auth/categories/:categoryId` to a single category based on categoryId
-- GET `api/v1/auth/categories/` to get all categories
-- GET `api/v1/auth/categories/:categoryId/articles` to get all articles associated with a single category based on categoryId
+- GET `api/v1/categories/:categoryId` to a single category based on categoryId
+- GET `api/v1/categories/` to get all categories
+- GET `api/v1/categories/:categoryId/articles` to get all articles associated with a single category based on categoryId
+- 
+
 
 ## Running the tests
 To run test:

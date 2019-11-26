@@ -22,24 +22,31 @@ class GifService {
     const comment = await commentService.getComments(queryDetails);
     const flag = await flagService.getFlaggedItem(queryDetails);
     const gif = await query.queryResult(getGifQuery, values);
+    if (!gif || gif.length < 1) {
+      return !gif;
+    }
     return [gif[0], comment, flag];
   }
 
   static async deleteGif(gifToDelete) {
     try {
-      let deleted = [];
-      const rows = await query.queryDetails('SELECT * from gifs WHERE "gifId" = $1', [gifToDelete.gifId]);
+      const rows = await query.queryResult('SELECT * from gifs WHERE "gifId" = $1', [gifToDelete.gifId]);
       if (!rows || rows.length < 1) {
         return !rows;
       }
-      deleted = rows[0];
-      const deleteDetails = { type: 'gif', typeId: gifToDelete.gifId };
-      await commentService.deleteCommentByItem(deleteDetails);
-      await flagService.deleteFlagByItem(deleteDetails);
-      const newGifQuery = 'DELETE FROM gifs WHERE "gifId" = ($1)';
-      const values = [`${gifToDelete.gifId}`];
-      await query.updateQueryResult(newGifQuery, values);
-      return deleted;
+      if (rows[0].userId === gifToDelete.userId) {
+        const deleteDetails = { type: 'gif', typeId: gifToDelete.gifId };
+        await commentService.deleteCommentByItem(deleteDetails);
+        await flagService.deleteFlagByItem(deleteDetails);
+        const newGifQuery = 'DELETE FROM gifs WHERE "gifId" = ($1)';
+        const values = [gifToDelete.gifId];
+        const deleteGifResult = await query.updateQueryResult(newGifQuery, values);
+        if (deleteGifResult === 'Successful') {
+          return rows;
+        }
+        return !deleteGifResult;
+      }
+      return ['Not authorized'];
     } catch (error) {
       throw error;
     }
@@ -49,7 +56,7 @@ class GifService {
   static async deleteUserGif(userId) {
     try {
       let deleted = [];
-      const rows = await query.queryDetails('SELECT * from gifs WHERE "userId" = $1', [userId]);
+      const rows = await query.queryResult('SELECT * from gifs WHERE "userId" = $1', [userId]);
       if (!rows || rows.length < 1) {
         return !rows;
       }
