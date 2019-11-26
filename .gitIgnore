@@ -1,11 +1,3 @@
 node_modules
 .vscode
 .env
-.nyc_output
-api/v1/test/a_user.spec.js
-api/v1/test/b_category.spec.js
-api/v1/test/c_article.spec.js
-api/v1/test/d_gif.spec.js
-api/v1/test/e_comment.spec.js
-api/v1/test/e_flag.spec.js
-api/v1/test/f_feed.spec.js

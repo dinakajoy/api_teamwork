@@ -5,6 +5,8 @@ const hpp = require('hpp');
 const helmet = require('helmet');
 const url = require('url');
 const fileupload = require('express-fileupload');
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('../swagger.json');
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -18,6 +20,7 @@ app.use(fileupload({
   safeFileNames: true,
   preserveExtension: true
 }));
+app.use('/docs/v1', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 const userRoutes = require('./v1/routes/userRoutes');
 const categoryRoutes = require('./v1/routes/categoryRoutes');

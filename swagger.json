@@ -1,923 +1,1191 @@
 {
-  "swagger" : "2.0",
-  "info" : {
-    "description" : "Teamwork is an internal social network for employees of an organization",
-    "version" : "1.0.0",
-    "title" : "Teamwork API",
-    "contact" : {
-      "email" : "odinakajoy909@gmail.com"
+  "swagger": "2.0",
+  "info": {
+    "description": "Teamwork is an internal social network for employees of an organization. The goal of this application is to facilitate more interaction between colleagues and promote team bonding",
+    "version": "1.0.0",
+    "title": "Teamwork Api",
+    "contact": {
+      "email": "odinakajoy909@gmail.com"
     },
-    "license" : {
-      "name" : "MIT",
-      "url" : "https://opensource.org/licenses/MIT"
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
     }
   },
-  "tags" : [ {
-    "name" : "admin",
-    "description" : "Secured Admin-only calls"
-  }, {
-    "name" : "auth",
-    "description" : "Authentication/Authoriazation endpoints"
-  }, {
-    "name" : "category",
-    "description" : "category endpoints to group articles based on topics"
-  }, {
-    "name" : "article",
-    "description" : "article endpoints"
-  }, {
-    "name" : "gif",
-    "description" : "gif endpoints"
-  }, {
-    "name" : "feed",
-    "description" : "feed endpoints to display all gifs and articles"
-  }, {
-    "name" : "comment",
-    "description" : "comment endpoints to comment on articles and gifs"
-  } ],
-  "paths" : {
-    "/create-account" : {
-      "post" : {
-        "tags" : [ "admin" ],
-        "summary" : "creates employee account",
-        "description" : "Adds an employee to the system",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "parameters" : [ {
-          "in" : "body",
-          "name" : "create user",
-          "description" : "user details to add",
-          "schema" : {
-            "$ref" : "#/definitions/CreateUser"
+  "host": "api-teamwork-by-joy.herokuapp.com",
+  "basePath": "/api/v1",
+  "tags": [
+    {
+      "name": "admin",
+      "description": "Secured Admin-only calls"
+    },
+    {
+      "name": "auth",
+      "description": "Authentication/Authoriazation endpoints"
+    },
+    {
+      "name": "category",
+      "description": "category endpoints to group articles based on topics"
+    },
+    {
+      "name": "article",
+      "description": "article endpoints"
+    },
+    {
+      "name": "gif",
+      "description": "gif endpoints"
+    },
+    {
+      "name": "feed",
+      "description": "feed endpoints to display all gifs and articles"
+    },
+    {
+      "name": "comment",
+      "description": "comment endpoints to comment on articles and gifs"
+    }
+  ],
+  "schemes": [
+    "https",
+    "http"
+  ],
+  "paths": {
+    "/create-account": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "creates employee account",
+        "description": "Adds an employee to the system",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "create user",
+            "description": "user details to add",
+            "schema": {
+              "$ref": "#/definitions/CreateUser"
+            }
           }
-        } ],
-        "responses" : {
-          "201" : {
-            "description" : "User account successfully created"
+        ],
+        "responses": {
+          "201": {
+            "description": "User account successfully created"
           },
-          "422" : {
-            "description" : "Invalid input, object invalid"
+          "409": {
+            "description": "An existing email already exists"
           },
-          "409" : {
-            "description" : "An existing email already exists"
+          "422": {
+            "description": "Invalid input, object invalid"
           },
-          "500" : {
-            "description" : "Server error"
+          "500": {
+            "description": "Server error"
           }
         }
       }
     },
-    "/signin" : {
-      "post" : {
-        "tags" : [ "auth" ],
-        "summary" : "logs in user",
-        "description" : "logs user to the system",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "parameters" : [ {
-          "in" : "body",
-          "name" : "login",
-          "description" : "user details to login",
-          "schema" : {
-            "$ref" : "#/definitions/Signin"
+    "/signin": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "logs in user",
+        "description": "logs user to the system",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "login",
+            "description": "user details to login",
+            "schema": {
+              "$ref": "#/definitions/Signin"
+            }
           }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "User successfully logged in"
+        ],
+        "responses": {
+          "200": {
+            "description": "User successfully logged in"
           },
-          "422" : {
-            "description" : "Invalid input, object invalid"
+          "422": {
+            "description": "Invalid input, object invalid"
           },
-          "500" : {
-            "description" : "Server error"
-          }
-        }
-      }
-    },
-    "/users" : {
-      "get" : {
-        "tags" : [ "auth" ],
-        "summary" : "displays all users",
-        "operationId" : "displays all registered users",
-        "description" : "By passing in the appropriate options, you can view details of all registered users\n",
-        "produces" : [ "application/json" ],
-        "responses" : {
-          "200" : {
-            "description" : "Users found"
-          },
-          "404" : {
-            "description" : "No registered user yet"
-          },
-          "422" : {
-            "description" : "Bad input parameter"
-          },
-          "500" : {
-            "description" : "Server error"
+          "500": {
+            "description": "Server error"
           }
         }
       }
     },
-    "/users/:userId" : {
-      "get" : {
-        "tags" : [ "auth" ],
-        "summary" : "displays user",
-        "operationId" : "displays user with id",
-        "description" : "By passing in the appropriate options, you can view details of a specific user\n",
-        "produces" : [ "application/json" ],
-        "parameters" : [ {
-          "in" : "query",
-          "name" : "searchString",
-          "description" : "pass an optional search string for looking up user",
-          "type" : "integer"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "User found"
+    "/users": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "displays all users",
+        "operationId": "displays all registered users",
+        "description": "By passing in the appropriate options, you can view details of all registered users\n",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Users found"
           },
-          "404" : {
-            "description" : "User not found"
+          "404": {
+            "description": "No registered user yet"
           },
-          "422" : {
-            "description" : "Bad input parameter"
+          "422": {
+            "description": "Bad input parameter"
           },
-          "500" : {
-            "description" : "Server error"
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/users/:userId": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "displays user",
+        "operationId": "displays user with id",
+        "description": "By passing in the appropriate options, you can view details of a specific user\n",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "searchString",
+            "description": "pass an optional search string for looking up user",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User found"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "422": {
+            "description": "Bad input parameter"
+          },
+          "500": {
+            "description": "Server error"
           }
         }
       },
-      "patch" : {
-        "tags" : [ "admin" ],
-        "summary" : "edit user",
-        "description" : "edit user with id record",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "parameters" : [ {
-          "in" : "body",
-          "name" : "editUser",
-          "description" : "user details to update",
-          "schema" : {
-            "$ref" : "#/definitions/CreateUser"
+      "patch": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "edit user",
+        "description": "edit user with id record",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "editUser",
+            "description": "user details to update",
+            "schema": {
+              "$ref": "#/definitions/CreateUser"
+            }
           }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "User successfully updated"
+        ],
+        "responses": {
+          "200": {
+            "description": "User successfully updated"
           },
-          "404" : {
-            "description" : "User was not found"
+          "404": {
+            "description": "User was not found"
           },
-          "422" : {
-            "description" : "Invalid input, object invalid"
+          "422": {
+            "description": "Invalid input, object invalid"
           },
-          "500" : {
-            "description" : "Server error"
-          }
-        }
-      },
-      "delete" : {
-        "tags" : [ "admin" ],
-        "summary" : "deletes user account",
-        "operationId" : "deletes user account with id",
-        "description" : "By passing in the appropriate options, you can view delete account of a specific user\n",
-        "produces" : [ "application/json" ],
-        "parameters" : [ {
-          "in" : "query",
-          "name" : "searchString",
-          "description" : "pass an optional search string for looking up user",
-          "type" : "integer"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "User successfullydeleted"
-          },
-          "404" : {
-            "description" : "No user not found"
-          },
-          "422" : {
-            "description" : "Bad input parameter"
-          },
-          "500" : {
-            "description" : "Server error"
-          }
-        }
-      }
-    },
-    "/change-password" : {
-      "post" : {
-        "tags" : [ "auth" ],
-        "summary" : "change user password",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "parameters" : [ {
-          "in" : "body",
-          "name" : "changePassword",
-          "schema" : {
-            "$ref" : "#/definitions/Signin"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "Account successfully updated"
-          },
-          "422" : {
-            "description" : "invalid input, object invalid"
-          },
-          "500" : {
-            "description" : "server error"
-          }
-        }
-      }
-    },
-    "/change-photo" : {
-      "post" : {
-        "tags" : [ "auth" ],
-        "summary" : "logs in user",
-        "description" : "logs user to the system",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "parameters" : [ {
-          "in" : "body",
-          "name" : "login",
-          "description" : "user details to login",
-          "schema" : {
-            "$ref" : "#/definitions/ChangePhoto"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "Account successfully updated"
-          },
-          "422" : {
-            "description" : "invalid input, object invalid"
-          },
-          "500" : {
-            "description" : "server error"
-          }
-        }
-      }
-    },
-    "/categories" : {
-      "post" : {
-        "tags" : [ "admin" ],
-        "summary" : "creates category",
-        "description" : "Adds an category to the system",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "parameters" : [ {
-          "in" : "body",
-          "name" : "create category",
-          "description" : "category details to add",
-          "schema" : {
-            "$ref" : "#/definitions/Category"
-          }
-        } ],
-        "responses" : {
-          "201" : {
-            "description" : "Category successfully created"
-          },
-          "422" : {
-            "description" : "Invalid input, object invalid"
-          },
-          "500" : {
-            "description" : "Server error"
+          "500": {
+            "description": "Server error"
           }
         }
       },
-      "get" : {
-        "tags" : [ "category" ],
-        "summary" : "displays all categories",
-        "description" : "displays all categories in the system",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "responses" : {
-          "201" : {
-            "description" : "Category found"
+      "delete": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "deletes user account",
+        "operationId": "deletes user account with id",
+        "description": "By passing in the appropriate options, you can view delete account of a specific user\n",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "searchString",
+            "description": "pass an optional search string for looking up user",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User successfullydeleted"
           },
-          "422" : {
-            "description" : "Invalid input, object invalid"
+          "404": {
+            "description": "No user not found"
           },
-          "500" : {
-            "description" : "Server error"
+          "422": {
+            "description": "Bad input parameter"
+          },
+          "500": {
+            "description": "Server error"
           }
         }
       }
     },
-    "/categories/:categoryId" : {
-      "patch" : {
-        "tags" : [ "admin" ],
-        "summary" : "update category",
-        "description" : "update an category to the system",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "parameters" : [ {
-          "in" : "body",
-          "name" : "update category",
-          "description" : "category details to update",
-          "schema" : {
-            "$ref" : "#/definitions/Category"
+    "/change-password": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "change user password",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "changePassword",
+            "schema": {
+              "$ref": "#/definitions/Signin"
+            }
           }
-        } ],
-        "responses" : {
-          "201" : {
-            "description" : "Category successfully updated"
+        ],
+        "responses": {
+          "200": {
+            "description": "Account successfully updated"
           },
-          "422" : {
-            "description" : "Invalid input, object invalid"
+          "422": {
+            "description": "invalid input, object invalid"
           },
-          "500" : {
-            "description" : "Server error"
-          }
-        }
-      }
-    },
-    "/categories/:categoryId/articles" : {
-      "get" : {
-        "tags" : [ "category" ],
-        "summary" : "display category with id",
-        "description" : "display category with id in the system and all articles",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "responses" : {
-          "201" : {
-            "description" : "Category found"
-          },
-          "404" : {
-            "description" : "No category found"
-          },
-          "422" : {
-            "description" : "Invalid input, object invalid"
-          },
-          "500" : {
-            "description" : "Server error"
+          "500": {
+            "description": "server error"
           }
         }
       }
     },
-    "/articles" : {
-      "post" : {
-        "tags" : [ "article" ],
-        "summary" : "creates article",
-        "description" : "Adds an article to the system",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "parameters" : [ {
-          "in" : "body",
-          "name" : "create article",
-          "description" : "article details to add",
-          "schema" : {
-            "$ref" : "#/definitions/Article"
+    "/change-photo": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "logs in user",
+        "description": "logs user to the system",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "login",
+            "description": "user details to login",
+            "schema": {
+              "$ref": "#/definitions/ChangePhoto"
+            }
           }
-        } ],
-        "responses" : {
-          "201" : {
-            "description" : "Article successfully posted"
+        ],
+        "responses": {
+          "200": {
+            "description": "Account successfully updated"
           },
-          "422" : {
-            "description" : "Invalid input, object invalid"
+          "422": {
+            "description": "invalid input, object invalid"
           },
-          "500" : {
-            "description" : "Server error"
+          "500": {
+            "description": "server error"
           }
         }
       }
     },
-    "/articles/:articleId" : {
-      "patch" : {
-        "tags" : [ "article" ],
-        "summary" : "update article",
-        "description" : "update an article to the system",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "parameters" : [ {
-          "in" : "body",
-          "name" : "update article",
-          "description" : "article details to update",
-          "schema" : {
-            "$ref" : "#/definitions/Article"
+    "/categories": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "creates category",
+        "description": "Adds an category to the system",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "create category",
+            "description": "category details to add",
+            "schema": {
+              "$ref": "#/definitions/Category"
+            }
           }
-        } ],
-        "responses" : {
-          "201" : {
-            "description" : "Article successfully updated"
+        ],
+        "responses": {
+          "201": {
+            "description": "Category successfully created"
           },
-          "422" : {
-            "description" : "Invalid input, object invalid"
+          "422": {
+            "description": "Invalid input, object invalid"
           },
-          "500" : {
-            "description" : "Server error"
+          "500": {
+            "description": "Server error"
           }
         }
       },
-      "get" : {
-        "tags" : [ "article" ],
-        "summary" : "display article with id",
-        "description" : "display article with id in the system and all articles",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "responses" : {
-          "201" : {
-            "description" : "Article found"
+      "get": {
+        "tags": [
+          "category"
+        ],
+        "summary": "displays all categories",
+        "description": "displays all categories in the system",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "Category found"
           },
-          "404" : {
-            "description" : "No article found"
+          "422": {
+            "description": "Invalid input, object invalid"
           },
-          "422" : {
-            "description" : "Invalid input, object invalid"
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/categories/:categoryId": {
+      "patch": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "update category",
+        "description": "update an category to the system",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "update category",
+            "description": "category details to update",
+            "schema": {
+              "$ref": "#/definitions/Category"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Category successfully updated"
           },
-          "500" : {
-            "description" : "Server error"
+          "422": {
+            "description": "Invalid input, object invalid"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/categories/:categoryId/articles": {
+      "get": {
+        "tags": [
+          "category"
+        ],
+        "summary": "display category with id",
+        "description": "display category with id in the system and all articles",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "Category found"
+          },
+          "404": {
+            "description": "No category found"
+          },
+          "422": {
+            "description": "Invalid input, object invalid"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/articles": {
+      "post": {
+        "tags": [
+          "article"
+        ],
+        "summary": "creates article",
+        "description": "Adds an article to the system",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "create article",
+            "description": "article details to add",
+            "schema": {
+              "$ref": "#/definitions/Article"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Article successfully posted"
+          },
+          "422": {
+            "description": "Invalid input, object invalid"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/articles/:articleId": {
+      "patch": {
+        "tags": [
+          "article"
+        ],
+        "summary": "update article",
+        "description": "update an article to the system",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "update article",
+            "description": "article details to update",
+            "schema": {
+              "$ref": "#/definitions/Article"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Article successfully updated"
+          },
+          "422": {
+            "description": "Invalid input, object invalid"
+          },
+          "500": {
+            "description": "Server error"
           }
         }
       },
-      "delete" : {
-        "tags" : [ "article" ],
-        "summary" : "display article with id",
-        "description" : "display article with id in the system and all articles",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "responses" : {
-          "201" : {
-            "description" : "Article successfully deleted"
+      "get": {
+        "tags": [
+          "article"
+        ],
+        "summary": "display article with id",
+        "description": "display article with id in the system and all articles",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "Article found"
           },
-          "404" : {
-            "description" : "No article found"
+          "404": {
+            "description": "No article found"
           },
-          "422" : {
-            "description" : "Invalid input, object invalid"
+          "422": {
+            "description": "Invalid input, object invalid"
           },
-          "500" : {
-            "description" : "Server error"
-          }
-        }
-      }
-    },
-    "/articles/:articleId/comment" : {
-      "post" : {
-        "tags" : [ "article" ],
-        "summary" : "comment on article",
-        "description" : "Adds an comment to article to the system",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "parameters" : [ {
-          "in" : "body",
-          "name" : "comment article",
-          "description" : "comment details to add",
-          "schema" : {
-            "$ref" : "#/definitions/Comment"
-          }
-        } ],
-        "responses" : {
-          "201" : {
-            "description" : "Comment successfully created"
-          },
-          "422" : {
-            "description" : "Invalid input, object invalid"
-          },
-          "500" : {
-            "description" : "Server error"
-          }
-        }
-      }
-    },
-    "/articles/:articleId/flag" : {
-      "post" : {
-        "tags" : [ "article" ],
-        "summary" : "flag on article",
-        "description" : "flag article in the system",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "parameters" : [ {
-          "in" : "body",
-          "name" : "flag article",
-          "description" : "flag details to add",
-          "schema" : {
-            "$ref" : "#/definitions/Flag"
-          }
-        } ],
-        "responses" : {
-          "201" : {
-            "description" : "Flag successfully created"
-          },
-          "422" : {
-            "description" : "Invalid input, object invalid"
-          },
-          "500" : {
-            "description" : "Server error"
-          }
-        }
-      }
-    },
-    "/gifs" : {
-      "post" : {
-        "tags" : [ "gif" ],
-        "summary" : "creates gif",
-        "description" : "Adds an gif to the system",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "parameters" : [ {
-          "in" : "body",
-          "name" : "create gif",
-          "description" : "gif details to add",
-          "schema" : {
-            "$ref" : "#/definitions/Gif"
-          }
-        } ],
-        "responses" : {
-          "201" : {
-            "description" : "Gif image successfully posted"
-          },
-          "422" : {
-            "description" : "Invalid input, object invalid"
-          },
-          "500" : {
-            "description" : "Server error"
-          }
-        }
-      }
-    },
-    "/gifs/:gifId" : {
-      "get" : {
-        "tags" : [ "gif" ],
-        "summary" : "display gif with id",
-        "description" : "display gif with id in the system",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "responses" : {
-          "201" : {
-            "description" : "Gif found"
-          },
-          "404" : {
-            "description" : "No gif found"
-          },
-          "422" : {
-            "description" : "Invalid input, object invalid"
-          },
-          "500" : {
-            "description" : "Server error"
+          "500": {
+            "description": "Server error"
           }
         }
       },
-      "delete" : {
-        "tags" : [ "gif" ],
-        "summary" : "display gif with id",
-        "description" : "display gif with id in the system",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "responses" : {
-          "201" : {
-            "description" : "Gif successfully deleted"
+      "delete": {
+        "tags": [
+          "article"
+        ],
+        "summary": "display article with id",
+        "description": "display article with id in the system and all articles",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "Article successfully deleted"
           },
-          "404" : {
-            "description" : "No gif found"
+          "404": {
+            "description": "No article found"
           },
-          "422" : {
-            "description" : "Invalid input, object invalid"
+          "422": {
+            "description": "Invalid input, object invalid"
           },
-          "500" : {
-            "description" : "Server error"
+          "500": {
+            "description": "Server error"
           }
         }
       }
     },
-    "/gifs/:gifId/comment" : {
-      "post" : {
-        "tags" : [ "gif" ],
-        "summary" : "comment on gif",
-        "description" : "Adds an comment to gif to the system",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "parameters" : [ {
-          "in" : "body",
-          "name" : "comment gif",
-          "description" : "gif details to add",
-          "schema" : {
-            "$ref" : "#/definitions/Comment"
+    "/articles/:articleId/comment": {
+      "post": {
+        "tags": [
+          "article"
+        ],
+        "summary": "comment on article",
+        "description": "Adds an comment to article to the system",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "comment article",
+            "description": "comment details to add",
+            "schema": {
+              "$ref": "#/definitions/Comment"
+            }
           }
-        } ],
-        "responses" : {
-          "201" : {
-            "description" : "Comment successfully created"
+        ],
+        "responses": {
+          "201": {
+            "description": "Comment successfully created"
           },
-          "422" : {
-            "description" : "Invalid input, object invalid"
+          "422": {
+            "description": "Invalid input, object invalid"
           },
-          "500" : {
-            "description" : "Server error"
-          }
-        }
-      }
-    },
-    "/gifs/:gifId/flag" : {
-      "post" : {
-        "tags" : [ "gif" ],
-        "summary" : "flag on gif",
-        "description" : "flag gif in the system",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "parameters" : [ {
-          "in" : "body",
-          "name" : "flag gif",
-          "description" : "flag details to add",
-          "schema" : {
-            "$ref" : "#/definitions/Flag"
-          }
-        } ],
-        "responses" : {
-          "201" : {
-            "description" : "Flag successfully created"
-          },
-          "422" : {
-            "description" : "Invalid input, object invalid"
-          },
-          "500" : {
-            "description" : "Server error"
+          "500": {
+            "description": "Server error"
           }
         }
       }
     },
-    "/comments/:commentId" : {
-      "patch" : {
-        "tags" : [ "comment" ],
-        "summary" : "update comment",
-        "description" : "update an comment to the system",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "parameters" : [ {
-          "in" : "body",
-          "name" : "update comment",
-          "description" : "comment details to update",
-          "schema" : {
-            "$ref" : "#/definitions/Comment"
+    "/articles/:articleId/flag": {
+      "post": {
+        "tags": [
+          "article"
+        ],
+        "summary": "flag on article",
+        "description": "flag article in the system",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "flag article",
+            "description": "flag details to add",
+            "schema": {
+              "$ref": "#/definitions/Flag"
+            }
           }
-        } ],
-        "responses" : {
-          "201" : {
-            "description" : "Comment successfully updated"
+        ],
+        "responses": {
+          "201": {
+            "description": "Flag successfully created"
           },
-          "422" : {
-            "description" : "Invalid input, object invalid"
+          "422": {
+            "description": "Invalid input, object invalid"
           },
-          "500" : {
-            "description" : "Server error"
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/gifs": {
+      "post": {
+        "tags": [
+          "gif"
+        ],
+        "summary": "creates gif",
+        "description": "Adds an gif to the system",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "create gif",
+            "description": "gif details to add",
+            "schema": {
+              "$ref": "#/definitions/Gif"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Gif image successfully posted"
+          },
+          "422": {
+            "description": "Invalid input, object invalid"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/gifs/:gifId": {
+      "get": {
+        "tags": [
+          "gif"
+        ],
+        "summary": "display gif with id",
+        "description": "display gif with id in the system",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "Gif found"
+          },
+          "404": {
+            "description": "No gif found"
+          },
+          "422": {
+            "description": "Invalid input, object invalid"
+          },
+          "500": {
+            "description": "Server error"
           }
         }
       },
-      "delete" : {
-        "tags" : [ "comment" ],
-        "summary" : "display comment with id",
-        "description" : "display comment with id in the system",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "responses" : {
-          "201" : {
-            "description" : "Comment successfully deleted"
+      "delete": {
+        "tags": [
+          "gif"
+        ],
+        "summary": "display gif with id",
+        "description": "display gif with id in the system",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "Gif successfully deleted"
           },
-          "404" : {
-            "description" : "No comment found"
+          "404": {
+            "description": "No gif found"
           },
-          "422" : {
-            "description" : "Invalid input, object invalid"
+          "422": {
+            "description": "Invalid input, object invalid"
           },
-          "500" : {
-            "description" : "Server error"
+          "500": {
+            "description": "Server error"
           }
         }
       }
     },
-    "/comments/:commentId/flag" : {
-      "post" : {
-        "tags" : [ "comment" ],
-        "summary" : "flag on comment",
-        "description" : "flag comment in the system",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "parameters" : [ {
-          "in" : "body",
-          "name" : "flag comment",
-          "description" : "flag details to add",
-          "schema" : {
-            "$ref" : "#/definitions/Flag"
+    "/gifs/:gifId/comment": {
+      "post": {
+        "tags": [
+          "gif"
+        ],
+        "summary": "comment on gif",
+        "description": "Adds an comment to gif to the system",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "comment gif",
+            "description": "gif details to add",
+            "schema": {
+              "$ref": "#/definitions/Comment"
+            }
           }
-        } ],
-        "responses" : {
-          "201" : {
-            "description" : "Flag successfully created"
+        ],
+        "responses": {
+          "201": {
+            "description": "Comment successfully created"
           },
-          "422" : {
-            "description" : "Invalid input, object invalid"
+          "422": {
+            "description": "Invalid input, object invalid"
           },
-          "500" : {
-            "description" : "Server error"
-          }
-        }
-      }
-    },
-    "/flags" : {
-      "get" : {
-        "tags" : [ "admin" ],
-        "summary" : "display flags",
-        "description" : "display flags in the system",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "responses" : {
-          "201" : {
-            "description" : "Flags found"
-          },
-          "404" : {
-            "description" : "No flag found"
-          },
-          "422" : {
-            "description" : "Invalid input, object invalid"
-          },
-          "500" : {
-            "description" : "Server error"
+          "500": {
+            "description": "Server error"
           }
         }
       }
     },
-    "/:typeId/:type" : {
-      "delete" : {
-        "tags" : [ "admin" ],
-        "summary" : "delete flags by type (article, gif or comment) with typeId specifying articleId, gifId or commentId) articles",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "responses" : {
-          "201" : {
-            "description" : "Flag successfully deleted"
+    "/gifs/:gifId/flag": {
+      "post": {
+        "tags": [
+          "gif"
+        ],
+        "summary": "flag on gif",
+        "description": "flag gif in the system",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "flag gif",
+            "description": "flag details to add",
+            "schema": {
+              "$ref": "#/definitions/Flag"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Flag successfully created"
           },
-          "404" : {
-            "description" : "No flag found"
+          "422": {
+            "description": "Invalid input, object invalid"
           },
-          "422" : {
-            "description" : "Invalid input, object invalid"
-          },
-          "500" : {
-            "description" : "Server error"
+          "500": {
+            "description": "Server error"
           }
         }
       }
     },
-    "/feed" : {
-      "get" : {
-        "tags" : [ "feed" ],
-        "summary" : "display all articles and gifs",
-        "consumes" : [ "application/json" ],
-        "produces" : [ "application/json" ],
-        "responses" : {
-          "201" : {
-            "description" : "success"
+    "/comments/:commentId": {
+      "patch": {
+        "tags": [
+          "comment"
+        ],
+        "summary": "update comment",
+        "description": "update an comment to the system",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "update comment",
+            "description": "comment details to update",
+            "schema": {
+              "$ref": "#/definitions/Comment"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Comment successfully updated"
           },
-          "404" : {
-            "description" : "No article and gif found"
+          "422": {
+            "description": "Invalid input, object invalid"
           },
-          "422" : {
-            "description" : "Invalid input, object invalid"
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "comment"
+        ],
+        "summary": "display comment with id",
+        "description": "display comment with id in the system",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "Comment successfully deleted"
           },
-          "500" : {
-            "description" : "Server error"
+          "404": {
+            "description": "No comment found"
+          },
+          "422": {
+            "description": "Invalid input, object invalid"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/comments/:commentId/flag": {
+      "post": {
+        "tags": [
+          "comment"
+        ],
+        "summary": "flag on comment",
+        "description": "flag comment in the system",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "flag comment",
+            "description": "flag details to add",
+            "schema": {
+              "$ref": "#/definitions/Flag"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Flag successfully created"
+          },
+          "422": {
+            "description": "Invalid input, object invalid"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/flags": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "display flags",
+        "description": "display flags in the system",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "Flags found"
+          },
+          "404": {
+            "description": "No flag found"
+          },
+          "422": {
+            "description": "Invalid input, object invalid"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/:typeId/:type": {
+      "delete": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "delete flags by type (article, gif or comment) with typeId specifying articleId, gifId or commentId) articles",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "Flag successfully deleted"
+          },
+          "404": {
+            "description": "No flag found"
+          },
+          "422": {
+            "description": "Invalid input, object invalid"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/feed": {
+      "get": {
+        "tags": [
+          "feed"
+        ],
+        "summary": "display all articles and gifs",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "success"
+          },
+          "404": {
+            "description": "No article and gif found"
+          },
+          "422": {
+            "description": "Invalid input, object invalid"
+          },
+          "500": {
+            "description": "Server error"
           }
         }
       }
     }
   },
-  "definitions" : {
-    "CreateUser" : {
-      "type" : "object",
-      "required" : [ "isAdmin", "firstName", "lastName", "email", "password", "picture", "gender", "jobRole", "department", "address" ],
-      "properties" : {
-        "isAdmin" : {
-          "type" : "boolean"
+  "securityDefinitions": {
+    "petstore_auth": {
+      "type": "oauth2",
+      "authorizationUrl": "http://petstore.swagger.io/oauth/dialog",
+      "flow": "implicit",
+      "scopes": {
+        "write:pets": "modify pets in your account",
+        "read:pets": "read your pets"
+      }
+    },
+    "api_key": {
+      "type": "apiKey",
+      "name": "api_key",
+      "in": "header"
+    }
+  },
+  "definitions": {
+    "CreateUser": {
+      "type": "object",
+      "required": [
+        "isAdmin",
+        "firstName",
+        "lastName",
+        "email",
+        "password",
+        "picture",
+        "gender",
+        "jobRole",
+        "department",
+        "address"
+      ],
+      "properties": {
+        "isAdmin": {
+          "type": "boolean"
         },
-        "firstName" : {
-          "type" : "string"
+        "firstName": {
+          "type": "string"
         },
-        "lastName" : {
-          "type" : "string"
+        "lastName": {
+          "type": "string"
         },
-        "email" : {
-          "type" : "string"
+        "email": {
+          "type": "string"
         },
-        "password" : {
-          "type" : "string"
+        "password": {
+          "type": "string"
         },
-        "picture" : {
-          "type" : "string"
+        "picture": {
+          "type": "string"
         },
-        "gender" : {
-          "type" : "string"
+        "gender": {
+          "type": "string"
         },
-        "jobRole" : {
-          "type" : "string"
+        "jobRole": {
+          "type": "string"
         },
-        "department" : {
-          "type" : "string"
+        "department": {
+          "type": "string"
         },
-        "address" : {
-          "type" : "string"
+        "address": {
+          "type": "string"
         }
       }
     },
-    "Signin" : {
-      "type" : "object",
-      "required" : [ "email", "password" ],
-      "properties" : {
-        "email" : {
-          "type" : "string"
+    "Signin": {
+      "type": "object",
+      "required": [
+        "email",
+        "password"
+      ],
+      "properties": {
+        "email": {
+          "type": "string"
         },
-        "password" : {
-          "type" : "string"
+        "password": {
+          "type": "string"
         }
       }
     },
-    "ChangePhoto" : {
-      "type" : "object",
-      "required" : [ "picture" ],
-      "properties" : {
-        "picture" : {
-          "type" : "string"
+    "ChangePhoto": {
+      "type": "object",
+      "required": [
+        "picture"
+      ],
+      "properties": {
+        "picture": {
+          "type": "string"
         }
       }
     },
-    "Category" : {
-      "type" : "object",
-      "required" : [ "category" ],
-      "properties" : {
-        "category" : {
-          "type" : "string"
+    "Category": {
+      "type": "object",
+      "required": [
+        "category"
+      ],
+      "properties": {
+        "category": {
+          "type": "string"
         }
       }
     },
-    "Article" : {
-      "type" : "object",
-      "required" : [ "categoryId", "title", "article", "articleImage", "userId" ],
-      "properties" : {
-        "categoryId" : {
-          "type" : "integer"
+    "Article": {
+      "type": "object",
+      "required": [
+        "categoryId",
+        "title",
+        "article",
+        "articleImage",
+        "userId"
+      ],
+      "properties": {
+        "categoryId": {
+          "type": "integer"
         },
-        "title" : {
-          "type" : "string"
+        "title": {
+          "type": "string"
         },
-        "article" : {
-          "type" : "string"
+        "article": {
+          "type": "string"
         },
-        "articleImage" : {
-          "type" : "string"
+        "articleImage": {
+          "type": "string"
         },
-        "userId" : {
-          "type" : "integer"
+        "userId": {
+          "type": "integer"
         }
       }
     },
-    "Gif" : {
-      "type" : "object",
-      "required" : [ "title", "gif", "userId" ],
-      "properties" : {
-        "title" : {
-          "type" : "string"
+    "Gif": {
+      "type": "object",
+      "required": [
+        "title",
+        "gif",
+        "userId"
+      ],
+      "properties": {
+        "title": {
+          "type": "string"
         },
-        "gif" : {
-          "type" : "string"
+        "gif": {
+          "type": "string"
         },
-        "userId" : {
-          "type" : "integer"
+        "userId": {
+          "type": "integer"
         }
       }
     },
-    "Comment" : {
-      "type" : "object",
-      "required" : [ "comment", "type", "typeId", "userId" ],
-      "properties" : {
-        "comment" : {
-          "type" : "string"
+    "Comment": {
+      "type": "object",
+      "required": [
+        "comment",
+        "type",
+        "typeId",
+        "userId"
+      ],
+      "properties": {
+        "comment": {
+          "type": "string"
         },
-        "type" : {
-          "type" : "string"
+        "type": {
+          "type": "string"
         },
-        "typeId" : {
-          "type" : "integer"
+        "typeId": {
+          "type": "integer"
         },
-        "userId" : {
-          "type" : "integer"
+        "userId": {
+          "type": "integer"
         }
       }
     },
-    "Flag" : {
-      "type" : "object",
-      "required" : [ "type", "typeId", "userId" ],
-      "properties" : {
-        "type" : {
-          "type" : "string"
+    "Flag": {
+      "type": "object",
+      "required": [
+        "type",
+        "typeId",
+        "userId"
+      ],
+      "properties": {
+        "type": {
+          "type": "string"
         },
-        "typeId" : {
-          "type" : "integer"
+        "typeId": {
+          "type": "integer"
         },
-        "userId" : {
-          "type" : "integer"
+        "userId": {
+          "type": "integer"
         }
       }
     }
-  },
-  "host" : "virtserver.swaggerhub.com",
-  "schemes" : [ "https", "http" ],
-  "basePath" : "/odinaka-joy/teamwork/1.0.0"
+  }
 }

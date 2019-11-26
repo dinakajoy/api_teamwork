@@ -1,5 +1,5 @@
 # Teamwork API
-[![Build Status](https://travis-ci.org/odinaka-joy/api_teamwork.svg?branch=develop)](https://travis-ci.org/odinaka-joy/api_teamwork)  [![Test Coverage](https://api.codeclimate.com/v1/badges/3ad294e357d57915c818/test_coverage)](https://codeclimate.com/github/odinaka-joy/api_teamwork/test_coverage)[![Maintainability](https://api.codeclimate.com/v1/badges/3ad294e357d57915c818/maintainability)](https://codeclimate.com/github/odinaka-joy/api_teamwork/maintainability)  [![Coverage Status](https://coveralls.io/repos/github/odinaka-joy/api_teamwork/badge.png?branch=develop)](https://coveralls.io/github/odinaka-joy/api_teamwork?branch=develop) (https://coveralls.io/github/odinaka-joy/api_teamwork?branch=develop) ![GitHub](https://img.shields.io/github/license/odinaka-joy/api_teamwork?style=flat-square)
+[![Build Status](https://travis-ci.org/odinaka-joy/api_teamwork.svg?branch=develop)](https://travis-ci.org/odinaka-joy/api_teamwork)  [![Test Coverage](https://api.codeclimate.com/v1/badges/3ad294e357d57915c818/test_coverage)](https://codeclimate.com/github/odinaka-joy/api_teamwork/test_coverage)[![Maintainability](https://api.codeclimate.com/v1/badges/3ad294e357d57915c818/maintainability)](https://codeclimate.com/github/odinaka-joy/api_teamwork/maintainability)  [![Coverage Status](https://coveralls.io/repos/github/odinaka-joy/api_teamwork/badge.png?branch=develop)](https://coveralls.io/github/odinaka-joy/api_teamwork?branch=develop) ![GitHub](https://img.shields.io/github/license/odinaka-joy/api_teamwork?style=flat-square)
 
 ## Description
 Teamwork is an internal social network for employees of an organization. The goal of this application is to facilitate more interaction between colleagues and promote team bonding.
@@ -53,10 +53,10 @@ Node/Express - The web framework used
 posgreSQL - DataBase Management System
 
 ## Heroku Link
-Access api via [link](https://odinaka-joy.github.io/my-portfolio/)
+Access api via [link](https://api-teamwork-by-joy.herokuapp.com/api/v1)
 
 ## Swagger API Documentation
-Access api documentation via [link](https://odinaka-joy.github.io/my-portfolio/)
+Access api documentation via [link](https://api-teamwork-by-joy.herokuapp.com/docs/v1)
 
 ## Appi Frontend
 Access api front end via [link](https://odinaka-joy.github.io/my-portfolio/)
@@ -71,7 +71,7 @@ To contribute, raise an issue and it will be reviewed
 This is the version one of this api
 
 ## License
-This project is licensed under the MIT License - see the [LICENSE.md](https://github.com/odinaka-joy/api_teamwork/blob/develop/LICENSE) file for details
+This project is licensed under the MIT License - see the [MIT License](https://opensource.org/licenses/MIT) file for details
 
 ## Acknowledgments
 Andela
