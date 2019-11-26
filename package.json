@@ -10,7 +10,6 @@
     "test:coverage": "nyc report --reporter=lcov",
     "test:coveralls": "nyc report --reporter=text-lcov | coveralls",
     "coverage": "npm run test:coveralls && npm run test:coverage",
-    "postte": "cross-env-shell NODE_ENV=test node api/v1/models/index dropAllTables",
     "start": "node ./api/server.js",
     "dev-server": "nodemon ./api/server.js"
   },
