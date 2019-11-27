@@ -26,7 +26,6 @@ exports.categoriesTable = async () => {
                     )`;
   await pool.query(queryText);
 };
-
 exports.articlesTable = async () => {
   const queryText = `CREATE TABLE IF NOT EXISTS articles (
                       "articleId" SERIAL PRIMARY KEY,

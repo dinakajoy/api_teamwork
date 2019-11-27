@@ -58,7 +58,7 @@ Access api via [link](https://api-teamwork-by-joy.herokuapp.com/api/v1)
 ## Swagger API Documentation
 Access api documentation via [link](https://api-teamwork-by-joy.herokuapp.com/docs/v1)
 
-## Appi Frontend
+## Api Frontend
 Access api front end via [link](https://odinaka-joy.github.io/my-portfolio/)
 
 ## Contributing: 
