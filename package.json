@@ -29,7 +29,7 @@
   },
   "homepage": "https://github.com/odinaka-joy/api_teamwork#readme",
   "dependencies": {
-    "bcrypt": "^3.0.6",
+    "bcrypt": "^5.0.0",
     "body-parser": "^1.19.0",
     "cloudinary": "^1.16.0",
     "connect-multiparty": "^2.2.0",
